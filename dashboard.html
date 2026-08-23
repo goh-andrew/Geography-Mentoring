@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard · IGCSE Geography 0460 Mentoring</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <h1>Mentor &amp; admin dashboard</h1>
+    <div class="acct-user" id="acctUser" hidden>
+      <span class="acct-who"><b id="acctName"></b><span class="acct-role-tag" id="acctRole"></span></span>
+      <a class="acct-btn" href="index.html">Back to site</a>
+      <button type="button" class="acct-btn" id="btnLogout">Log out</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="gate" id="gate" hidden>
+    <h2 id="gateTitle">Not available</h2>
+    <p id="gateMsg"></p>
+    <p><a href="index.html">&larr; Back to the site</a></p>
+  </div>
+
+  <section class="band" id="menteesSection" hidden>
+    <div class="band-head"><span class="band-num">Mentoring</span><h2>My mentees</h2></div>
+    <p class="band-sub">Progress synced from each mentee's own device the last time they had it open.</p>
+    <div class="mentee-list" id="menteeList"></div>
+  </section>
+
+  <section class="band" id="adminSection" hidden>
+    <div class="band-head"><span class="band-num">Admin</span><h2>Manage everyone</h2></div>
+    <p class="band-sub">Set who mentors who, promote or demote roles, and remove accounts. Changes apply immediately.</p>
+    <div class="datawrap"><table class="data admin-table" id="adminTable">
+      <thead><tr><th>Username</th><th>Role</th><th>Mentor</th><th>Admin</th><th></th></tr></thead>
+      <tbody><tr><td colspan="5">Loading&hellip;</td></tr></tbody>
+    </table></div>
+    <p class="auth-note" id="adminMsg"></p>
+  </section>
+</main>
+
+<script type="module">
+import {
+  onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { TOPICS } from "./topics-data.js";
+import { auth, db, fbReady, friendlyAuthError, esc } from "./cloud.js";
+
+function caseFlat(){
+  const out=[];
+  TOPICS.forEach(t=>t.cases.forEach((c,i)=>out.push({id:t.code+':'+i, code:t.code, t:c.t, src:c.src, letter:String.fromCharCode(97+i)})));
+  return out;
+}
+
+let currentUser=null;
+
+function showGate(title, msg){
+  document.getElementById('gateTitle').textContent=title;
+  document.getElementById('gateMsg').textContent=msg;
+  document.getElementById('gate').hidden=false;
+  document.getElementById('menteesSection').hidden=true;
+  document.getElementById('adminSection').hidden=true;
+}
+
+document.getElementById('btnLogout').addEventListener('click',()=>{ if(fbReady) signOut(auth); });
+
+/* ==================== mentor: my mentees ==================== */
+async function loadMentorDashboard(uid){
+  const host=document.getElementById('menteeList');
+  host.innerHTML='<p class="mentee-empty">Loading your mentees&hellip;</p>';
+  try{
+    const snap=await getDocs(query(collection(db,'users'), where('mentorUid','==',uid)));
+    if(snap.empty){ host.innerHTML='<p class="mentee-empty">No mentees have picked you yet. Share your username so they can choose you when they sign up.</p>'; return; }
+    const cases=caseFlat();
+    const cards=await Promise.all(snap.docs.map(async d=>{
+      const mentee=d.data();
+      let prog={levels:{},caseLevels:{}};
+      try{ const ps=await getDoc(doc(db,'progress',d.id)); if(ps.exists()) prog=ps.data(); }catch(e){}
+      const confTopics=TOPICS.filter(t=>(prog.levels&&prog.levels[t.code])===2).length;
+      const confCases=cases.filter(c=>(prog.caseLevels&&prog.caseLevels[c.id])===2).length;
+      // one row per topic — its case studies nest directly under it, so each
+      // topic number appears once instead of being repeated across two lists
+      const topicGroups=TOPICS.map(t=>{
+        const lvl=(prog.levels&&prog.levels[t.code])||0;
+        const topicChip='<span class="chip lvl-'+lvl+'">'+t.code+' &middot; '+esc(t.title)+'</span>';
+        const myCases=cases.filter(c=>c.code===t.code);
+        const subRow=myCases.length ? '<div class="chip-row sub-chip-row">'+myCases.map(c=>{
+          const clvl=(prog.caseLevels&&prog.caseLevels[c.id])||0;
+          return '<span class="chip chip-sub lvl-'+clvl+'">'+c.code+c.letter+' &middot; '+esc(c.t)+(c.src?' — '+esc(c.src):'')+'</span>';
+        }).join('')+'</div>' : '';
+        return '<div class="topic-group">'+topicChip+subRow+'</div>';
+      }).join('');
+      return '<article class="mentee-card">'+
+        '<h4>'+esc(mentee.username)+'</h4>'+
+        '<div class="mentee-stats"><span><b>'+confTopics+'</b> of '+TOPICS.length+' topics confident</span>'+
+        '<span><b>'+confCases+'</b> of '+cases.length+' case studies confident</span></div>'+
+        '<div class="topic-groups">'+topicGroups+'</div>'+
+        '</article>';
+    }));
+    host.innerHTML=cards.join('');
+  }catch(e){ host.innerHTML='<p class="mentee-empty">Could not load mentees. '+esc(friendlyAuthError(e))+'</p>'; console.warn(e); }
+}
+
+/* ==================== admin panel ==================== */
+async function loadAdminPanel(){
+  const tbody=document.querySelector('#adminTable tbody');
+  const msg=document.getElementById('adminMsg');
+  tbody.innerHTML='<tr><td colspan="5">Loading&hellip;</td></tr>';
+  let all;
+  try{
+    const snap=await getDocs(collection(db,'users'));
+    all=snap.docs.map(d=>({uid:d.id, ...d.data()}));
+  }catch(e){ tbody.innerHTML='<tr><td colspan="5">Could not load users. '+esc(friendlyAuthError(e))+'</td></tr>'; console.warn(e); return; }
+
+  const mentors=all.filter(u=>u.role==='mentor');
+  function mentorOptsFor(currentUid){
+    return '<option value=""'+(!currentUid?' selected':'')+'>— none —</option>'+
+      mentors.map(m=>'<option value="'+m.uid+'"'+(m.uid===currentUid?' selected':'')+'>'+esc(m.username)+'</option>').join('');
+  }
+
+  tbody.innerHTML = all.map(u=>{
+    const isMentee=u.role==='mentee';
+    const isMentor=u.role==='mentor';
+    const mentorCell = isMentee
+      ? '<select data-mentor-uid="'+u.uid+'">'+mentorOptsFor(u.mentorUid)+'</select>'
+      : '<span class="muted-cell">—</span>';
+    const adminCell = isMentor
+      ? '<label class="admin-flag"><input type="checkbox" data-admin-uid="'+u.uid+'"'+(u.isAdmin?' checked':'')+'> Admin</label>'
+      : '<span class="muted-cell">—</span>';
+    return '<tr data-row-uid="'+u.uid+'"><td>'+esc(u.username)+(u.uid===currentUser.uid?' <span class="muted-cell">(you)</span>':'')+'</td>'+
+      '<td><select data-role-uid="'+u.uid+'"><option value="mentee"'+(isMentee?' selected':'')+'>Mentee</option><option value="mentor"'+(isMentor?' selected':'')+'>Mentor</option></select></td>'+
+      '<td>'+mentorCell+'</td>'+
+      '<td>'+adminCell+'</td>'+
+      '<td><button type="button" class="admin-remove" data-remove-uid="'+u.uid+'" data-remove-name="'+esc(u.username)+'">Remove</button></td></tr>';
+  }).join('') || '<tr><td colspan="5">No users yet.</td></tr>';
+
+  tbody.querySelectorAll('[data-role-uid]').forEach(sel=>sel.addEventListener('change', async ()=>{
+    const uid=sel.dataset.roleUid, role=sel.value;
+    msg.textContent='';
+    try{
+      const patch={role};
+      if(role==='mentor') patch.mentorUid=null; // a mentor doesn't have a mentor of their own
+      await setDoc(doc(db,'users',uid), patch, {merge:true});
+      loadAdminPanel();
+    }catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); }
+  }));
+  tbody.querySelectorAll('[data-mentor-uid]').forEach(sel=>sel.addEventListener('change', async ()=>{
+    const uid=sel.dataset.mentorUid;
+    msg.textContent='';
+    try{ await setDoc(doc(db,'users',uid), {mentorUid: sel.value||null}, {merge:true}); msg.style.color='var(--current)'; msg.textContent='Saved.'; }
+    catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); }
+  }));
+  tbody.querySelectorAll('[data-admin-uid]').forEach(cb=>cb.addEventListener('change', async ()=>{
+    const uid=cb.dataset.adminUid;
+    msg.textContent='';
+    try{ await setDoc(doc(db,'users',uid), {isAdmin: cb.checked}, {merge:true});
+      if(uid===currentUser.uid){ currentUser.isAdmin=cb.checked; }
+    }catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); cb.checked=!cb.checked; }
+  }));
+  tbody.querySelectorAll('[data-remove-uid]').forEach(btn=>btn.addEventListener('click', async ()=>{
+    const uid=btn.dataset.removeUid, name=btn.dataset.removeName;
+    if(!confirm('Remove '+name+'\'s account? This deletes their profile and progress, and can\'t be undone. (Their login itself stays until removed from the Firebase console — see FIREBASE_SETUP.md.)')) return;
+    msg.textContent='';
+    try{
+      await deleteDoc(doc(db,'users',uid));
+      try{ await deleteDoc(doc(db,'progress',uid)); }catch(e){}
+      loadAdminPanel();
+    }catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); }
+  }));
+}
+
+/* ==================== auth state ==================== */
+if(fbReady){
+  onAuthStateChanged(auth, async user=>{
+    if(!user){ currentUser=null; showGate('Log in first', "You need to be logged in as a mentor or admin to see this page."); return; }
+    try{
+      const uSnap=await getDoc(doc(db,'users',user.uid));
+      if(!uSnap.exists()){ currentUser=null; showGate('Log in first', "You need to be logged in as a mentor or admin to see this page."); return; }
+      const u=uSnap.data();
+      currentUser={uid:user.uid, username:u.username, role:u.role, isAdmin:u.isAdmin===true};
+
+      document.getElementById('acctUser').hidden=false;
+      document.getElementById('acctName').textContent=currentUser.username;
+      document.getElementById('acctRole').textContent=currentUser.role+(currentUser.isAdmin?' · admin':'');
+
+      if(currentUser.role!=='mentor' && !currentUser.isAdmin){
+        showGate('Nothing here for mentees', "This page is for mentors and admins. Head back to the site to keep working through the syllabus.");
+        return;
+      }
+      document.getElementById('gate').hidden=true;
+      if(currentUser.role==='mentor'){
+        document.getElementById('menteesSection').hidden=false;
+        loadMentorDashboard(user.uid);
+      }
+      if(currentUser.isAdmin){
+        document.getElementById('adminSection').hidden=false;
+        loadAdminPanel();
+      }
+    }catch(e){ console.warn('auth state handling failed', e); showGate('Something went wrong', friendlyAuthError(e)); }
+  });
+}else{
+  showGate('Accounts are not set up yet', 'See FIREBASE_SETUP.md.');
+}
+</script>
+</body>
+</html>
