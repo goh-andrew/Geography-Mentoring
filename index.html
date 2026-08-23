@@ -130,7 +130,7 @@
 
       <section class="band" id="cases">
         <div class="band-head"><h2>Case Studies</h2></div>
-        <p class="band-sub">Every required case study. Mark your confidence on each once you can produce the place, figures and dates from memory.</p>
+        <p class="band-sub" id="casesBandSub">Every required case study. Mark your confidence on each once you can produce the place, figures and dates from memory.</p>
         <div class="transect">
           <div class="transect-head">
             <p id="case-transect-h">Cross-section — your case study confidence</p>
@@ -848,6 +848,7 @@ function drawCaseProfile(){
   });
 
   document.getElementById('caseKeyGroup').hidden=isMentor;
+  document.getElementById('casesBandSub').hidden=isMentor;
   if(isMentor){
     document.getElementById('case-transect-h').textContent="Cross-section — your mentees' case study confidence";
     document.getElementById('case-transect-count').textContent=mentorMentees.length ? mentorMentees.length+' mentee'+(mentorMentees.length===1?'':'s')+' shown' : 'No mentees yet';

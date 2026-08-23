@@ -82,6 +82,8 @@ a{color:var(--current);}
 #cases .transect{margin-top:22px;}
 #cases .transect-head p{color:var(--muted);}
 #cases .legend{color:var(--muted);}
+#cases .mentee-legend{color:var(--muted);}
+#cases .mentee-legend b{color:var(--ink);}
 .case-grid-line{stroke:var(--rule);stroke-width:1;}
 .case-axis-label{font-family:var(--mono);font-size:9.5px;fill:var(--muted);letter-spacing:.12em;}
 .case-profile-line{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round;}
