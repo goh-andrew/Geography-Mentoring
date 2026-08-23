@@ -40,8 +40,8 @@
     <div class="band-head"><span class="band-num">Admin</span><h2>Manage everyone</h2></div>
     <p class="band-sub">Set who mentors who, promote or demote roles, and remove accounts. Changes apply immediately.</p>
     <div class="datawrap"><table class="data admin-table" id="adminTable">
-      <thead><tr><th>Username</th><th>Role</th><th>Mentor</th><th>Admin</th><th></th></tr></thead>
-      <tbody><tr><td colspan="5">Loading&hellip;</td></tr></tbody>
+      <thead><tr><th>Username</th><th>Role</th><th>Approved</th><th>Mentor</th><th>Admin</th><th></th></tr></thead>
+      <tbody><tr><td colspan="6">Loading&hellip;</td></tr></tbody>
     </table></div>
     <p class="auth-note" id="adminMsg"></p>
   </section>
@@ -116,14 +116,15 @@ async function loadMentorDashboard(uid){
 async function loadAdminPanel(){
   const tbody=document.querySelector('#adminTable tbody');
   const msg=document.getElementById('adminMsg');
-  tbody.innerHTML='<tr><td colspan="5">Loading&hellip;</td></tr>';
+  tbody.innerHTML='<tr><td colspan="6">Loading&hellip;</td></tr>';
   let all;
   try{
     const snap=await getDocs(collection(db,'users'));
     all=snap.docs.map(d=>({uid:d.id, ...d.data()}));
-  }catch(e){ tbody.innerHTML='<tr><td colspan="5">Could not load users. '+esc(friendlyAuthError(e))+'</td></tr>'; console.warn(e); return; }
+  }catch(e){ tbody.innerHTML='<tr><td colspan="6">Could not load users. '+esc(friendlyAuthError(e))+'</td></tr>'; console.warn(e); return; }
 
-  const mentors=all.filter(u=>u.role==='mentor');
+  // only approved mentors (or admins, who bypass approval) count as choosable mentors
+  const mentors=all.filter(u=>u.role==='mentor' && (u.mentorApproved || u.isAdmin));
   function mentorOptsFor(currentUid){
     return '<option value=""'+(!currentUid?' selected':'')+'>— none —</option>'+
       mentors.map(m=>'<option value="'+m.uid+'"'+(m.uid===currentUid?' selected':'')+'>'+esc(m.username)+'</option>').join('');
@@ -135,15 +136,19 @@ async function loadAdminPanel(){
     const mentorCell = isMentee
       ? '<select data-mentor-uid="'+u.uid+'">'+mentorOptsFor(u.mentorUid)+'</select>'
       : '<span class="muted-cell">—</span>';
+    const approvedCell = isMentor
+      ? '<label class="admin-flag"><input type="checkbox" data-approved-uid="'+u.uid+'"'+((u.mentorApproved||u.isAdmin)?' checked':'')+(u.isAdmin?' disabled title="Admins are always treated as approved"':'')+'> Approved</label>'
+      : '<span class="muted-cell">—</span>';
     const adminCell = isMentor
       ? '<label class="admin-flag"><input type="checkbox" data-admin-uid="'+u.uid+'"'+(u.isAdmin?' checked':'')+'> Admin</label>'
       : '<span class="muted-cell">—</span>';
     return '<tr data-row-uid="'+u.uid+'"><td>'+esc(u.username)+(u.uid===currentUser.uid?' <span class="muted-cell">(you)</span>':'')+'</td>'+
       '<td><select data-role-uid="'+u.uid+'"><option value="mentee"'+(isMentee?' selected':'')+'>Mentee</option><option value="mentor"'+(isMentor?' selected':'')+'>Mentor</option></select></td>'+
+      '<td>'+approvedCell+'</td>'+
       '<td>'+mentorCell+'</td>'+
       '<td>'+adminCell+'</td>'+
       '<td><button type="button" class="admin-remove" data-remove-uid="'+u.uid+'" data-remove-name="'+esc(u.username)+'">Remove</button></td></tr>';
-  }).join('') || '<tr><td colspan="5">No users yet.</td></tr>';
+  }).join('') || '<tr><td colspan="6">No users yet.</td></tr>';
 
   tbody.querySelectorAll('[data-role-uid]').forEach(sel=>sel.addEventListener('change', async ()=>{
     const uid=sel.dataset.roleUid, role=sel.value;
@@ -160,6 +165,12 @@ async function loadAdminPanel(){
     msg.textContent='';
     try{ await setDoc(doc(db,'users',uid), {mentorUid: sel.value||null}, {merge:true}); msg.style.color='var(--current)'; msg.textContent='Saved.'; }
     catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); }
+  }));
+  tbody.querySelectorAll('[data-approved-uid]').forEach(cb=>cb.addEventListener('change', async ()=>{
+    const uid=cb.dataset.approvedUid;
+    msg.textContent='';
+    try{ await setDoc(doc(db,'users',uid), {mentorApproved: cb.checked}, {merge:true}); loadAdminPanel(); }
+    catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); cb.checked=!cb.checked; }
   }));
   tbody.querySelectorAll('[data-admin-uid]').forEach(cb=>cb.addEventListener('change', async ()=>{
     const uid=cb.dataset.adminUid;
@@ -188,18 +199,23 @@ if(fbReady){
       const uSnap=await getDoc(doc(db,'users',user.uid));
       if(!uSnap.exists()){ currentUser=null; showGate('Log in first', "You need to be logged in as a mentor or admin to see this page."); return; }
       const u=uSnap.data();
-      currentUser={uid:user.uid, username:u.username, role:u.role, isAdmin:u.isAdmin===true};
+      currentUser={uid:user.uid, username:u.username, role:u.role, isAdmin:u.isAdmin===true, mentorApproved:u.mentorApproved===true};
+      const isApprovedMentor=currentUser.role==='mentor' && (currentUser.mentorApproved || currentUser.isAdmin);
 
       document.getElementById('acctUser').hidden=false;
       document.getElementById('acctName').textContent=currentUser.username;
-      document.getElementById('acctRole').textContent=currentUser.role+(currentUser.isAdmin?' · admin':'');
+      document.getElementById('acctRole').textContent=currentUser.role+(currentUser.isAdmin?' · admin':'')+(currentUser.role==='mentor'&&!isApprovedMentor?' · pending':'');
 
-      if(currentUser.role!=='mentor' && !currentUser.isAdmin){
+      if(currentUser.role==='mentor' && !isApprovedMentor){
+        showGate('Waiting on admin approval', "Your mentor account isn't approved yet — an admin needs to confirm it in Manage everyone before you can see any mentees here. Check back once that's done.");
+        return;
+      }
+      if(!isApprovedMentor && !currentUser.isAdmin){
         showGate('Nothing here for mentees', "This page is for mentors and admins. Head back to the site to keep working through the syllabus.");
         return;
       }
       document.getElementById('gate').hidden=true;
-      if(currentUser.role==='mentor'){
+      if(isApprovedMentor){
         document.getElementById('menteesSection').hidden=false;
         loadMentorDashboard(user.uid);
       }

@@ -43,11 +43,25 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if true;
       allow create: if isSelf(uid) &&
-        (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == false);
+        (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == false) &&
+        (
+          request.resource.data.role == 'mentee' ||
+          (
+            request.resource.data.role == 'mentor' &&
+            (!('mentorApproved' in request.resource.data) || request.resource.data.mentorApproved == false) &&
+            request.resource.data.mentorInviteCodeUsed ==
+              get(/databases/$(database)/documents/config/mentorInvite).data.code
+          )
+        );
       allow update: if isAdmin() ||
         (isSelf(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['mentorUid']));
       allow delete: if isAdmin();
     }
+
+    // deliberately no rule for /config/{document=**} — default-deny means no
+    // client can ever read or write it. The invite-code check above still
+    // works because rules evaluate get() with full backend access,
+    // regardless of what read permission the path itself has.
 
     function isMyMentor(uid) {
       return request.auth != null &&
@@ -66,13 +80,15 @@ service cloud.firestore {
 Click **Publish**. In plain terms: anyone — even signed out, since the
 sign-up form needs to show the mentor list *before* someone has an account —
 can see the (non-secret) list of usernames and roles; a normal person can
-create their own profile and change only their own mentor choice; an
-**admin** (see step 7) can edit or delete *anyone's* profile — role, mentor
-assignment, admin status — and read or delete anyone's progress; and a
-mentor can additionally *read and write* the progress of any mentee whose
-profile names them as the mentor — so a mentor can mark a mentee's topic and
-case-study status on their behalf, e.g. during a session together, the same
-way the mentee could themselves.
+create their own profile and change only their own mentor choice; signing up
+as a **mentor** additionally requires knowing the invite code from step 4a
+below, and even then the new account starts unapproved until an admin
+confirms it (see step 7); an **admin** (see step 7) can edit or delete
+*anyone's* profile — role, mentor assignment, admin status, approval — and
+read or delete anyone's progress; and an approved mentor can *read and
+write* the progress of any mentee whose profile names them as the mentor —
+so a mentor can mark a mentee's topic and case-study status on their behalf,
+e.g. during a session together, the same way the mentee could themselves.
 
 > **Trust note:** this means a mentee's self-assessed progress is no longer
 > theirs alone to edit — their mentor can change it too. That's the point
@@ -84,6 +100,19 @@ way the mentee could themselves.
 > a **"Could not load mentors"** / `permission-denied` error on the sign-up
 > form, that was this exact issue in an earlier draft — just paste the block
 > above in and Publish again.
+
+## 4a. Set the mentor invite code
+
+Anyone signing up with the role **Mentor** has to enter this code, and it's
+checked by the security rule you just published — not just the page, so it
+can't be bypassed from the browser console.
+
+1. Firebase console → **Build → Firestore Database → Data**.
+2. Click **Start collection**, name it exactly `config`.
+3. For the first document, set the **Document ID** to exactly `mentorInvite` (don't use "Auto-ID").
+4. Add one field: name `code`, type **string**, value whatever phrase you want people to type (e.g. `geo0460-mentor-2026`). Save.
+
+Change this value any time to invalidate the old code (e.g. if it's shared more widely than you intended) — nobody can read this document from the site itself, only the security rule can check against it.
 
 ## 5. Get your web app config
 
@@ -122,13 +151,17 @@ remove admin on other mentors, and remove accounts. Nobody can make
 *themselves* an admin from the site — that field can only be set by an
 existing admin, or, for the very first one, by you directly in the database:
 
-1. Sign up on the live site as normal, with the role **Mentor**.
+1. Sign up on the live site as normal, with the role **Mentor** and the invite code from step 4a. (You'll land in the "pending approval" state — that's expected, and fine to skip past for this bootstrap step.)
 2. In the Firebase console: **Build → Firestore Database → Data**.
 3. Open the **users** collection and click the document that matches your account (match it by the `username` field).
 4. Click **Add field**: field name `isAdmin`, type **boolean**, value `true`. Save.
 5. Refresh the site and log back in — a **Mentor / admin dashboard** link should now appear in the sidebar; it opens [dashboard.html](dashboard.html) with the **Manage everyone** panel on it.
 
-From then on, that admin can grant admin to other mentors straight from the panel — no more manual database editing needed.
+Admin status alone unlocks full mentor features too (you don't also need to
+separately approve yourself) — the site treats an admin as an approved
+mentor regardless of that field. From then on, that admin can approve
+pending mentors and grant admin to other mentors straight from the panel —
+no more manual database editing needed.
 
 > **On "remove accounts":** removing someone in the admin panel deletes their
 > profile and progress from the database, so they disappear from every list
@@ -186,3 +219,12 @@ rows and **Delete accounts**.
 - Admin status only ever shows real effect for mentors (mentees don't get a
   dashboard to manage), but the rules don't hard-block setting it on a
   mentee — the admin panel just won't show them anything extra either way.
+- A new mentor signup is unapproved until an admin ticks the **Approved**
+  checkbox for them in **Manage everyone** (it's unticked by default for a
+  new mentor row, same place as the Admin checkbox). Until approved, they're
+  treated like an ordinary mentee — no "I'm a mentor" toggle, no mentees
+  list, no dashboard access — even though their account's `role` is already
+  `mentor`. That checkbox can be unticked again too, e.g. to revoke mentor
+  access without changing their role. Losing or forgetting the invite code
+  is not fatal: an admin can approve someone from the panel regardless of
+  whether they used a code, since the code only gates *signup*, not approval.
