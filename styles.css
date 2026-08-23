@@ -52,6 +52,7 @@ a{color:var(--current);}
 .profile-line{fill:none;stroke:#F3F7F5;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round;}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--mono);font-size:11px;color:#8FA6A4;padding:10px 0 26px;}
 .legend span{display:inline-flex;align-items:center;gap:7px;}
+#topicKeyGroup,#caseKeyGroup{display:contents;}
 .key{width:11px;height:11px;display:inline-block;}
 .mentee-legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-family:var(--mono);font-size:11px;color:#A9C0BE;padding:0 0 26px;margin-top:-16px;}
 .mentee-legend .m{display:inline-flex;align-items:center;gap:7px;}

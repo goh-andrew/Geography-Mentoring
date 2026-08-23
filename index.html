@@ -44,9 +44,11 @@
         <svg id="profile" viewBox="0 0 960 210" role="img" aria-label="A topographic cross-section where each syllabus topic is a station; the profile rises as you mark topics confident."></svg>
       </div>
       <div class="legend">
-        <span><i class="key" style="background:#C98A2E"></i> confident</span>
-        <span><i class="key" style="background:#48B7A6"></i> learning</span>
-        <span><i class="key" style="background:#1B7F8E"></i> not started</span>
+        <span class="key-group" id="topicKeyGroup">
+          <span><i class="key" style="background:#C98A2E"></i> confident</span>
+          <span><i class="key" style="background:#48B7A6"></i> learning</span>
+          <span><i class="key" style="background:#1B7F8E"></i> not started</span>
+        </span>
         <span>Click any station to jump to that topic.</span>
       </div>
       <div class="mentee-legend" id="menteeLegend" hidden></div>
@@ -138,9 +140,11 @@
             <svg id="case-profile" viewBox="0 0 960 210" role="img" aria-label="A cross-section where each required case study is a station; the profile rises as you mark case studies confident."></svg>
           </div>
           <div class="legend">
-            <span><i class="key" style="background:#C98A2E"></i> confident</span>
-            <span><i class="key" style="background:#48B7A6"></i> learning</span>
-            <span><i class="key" style="background:#1B7F8E"></i> not started</span>
+            <span class="key-group" id="caseKeyGroup">
+              <span><i class="key" style="background:#C98A2E"></i> confident</span>
+              <span><i class="key" style="background:#48B7A6"></i> learning</span>
+              <span><i class="key" style="background:#1B7F8E"></i> not started</span>
+            </span>
             <span>Click any station, or a row below, to jump to that topic.</span>
           </div>
           <div class="mentee-legend" id="caseMenteeLegend" hidden></div>
@@ -662,6 +666,7 @@ function drawProfile(){
     s.appendChild(g);
   });
 
+  document.getElementById('topicKeyGroup').hidden=isMentor;
   if(isMentor){
     document.getElementById('transect-h').textContent="Your mentees' progress through the syllabus";
     document.getElementById('transect-count').textContent=mentorMentees.length ? mentorMentees.length+' mentee'+(mentorMentees.length===1?'':'s')+' shown' : 'No mentees yet';
@@ -842,6 +847,7 @@ function drawCaseProfile(){
     s.appendChild(g);
   });
 
+  document.getElementById('caseKeyGroup').hidden=isMentor;
   if(isMentor){
     document.getElementById('case-transect-h').textContent="Cross-section — your mentees' case study confidence";
     document.getElementById('case-transect-count').textContent=mentorMentees.length ? mentorMentees.length+' mentee'+(mentorMentees.length===1?'':'s')+' shown' : 'No mentees yet';
