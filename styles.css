@@ -215,7 +215,7 @@ footer a{color:var(--reef);}
 .acct-who b{color:#F3F7F5;}
 .acct-role-tag{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--abyss);background:var(--reef);padding:2px 6px;margin-left:6px;}
 body[data-track="mentor"] .acct-role-tag{background:var(--sediment);}
-@media (max-width:640px){ .acct-bar{position:static;justify-content:flex-start;margin-top:18px;} }
+@media (max-width:640px){ .acct-bar{position:static;justify-content:flex-start;margin-top:18px;padding:0 var(--pad);max-width:none;} }
 
 /* ---------- modal ---------- */
 .modal-backdrop{position:fixed;inset:0;background:rgba(10,31,43,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;}

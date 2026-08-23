@@ -128,6 +128,30 @@ From then on, that admin can grant admin to other mentors straight from the pane
 > **Build → Authentication → Users**, find them by their fake email
 > (`username@geo0460-mentoring.local`), and delete them there.
 
+## Deleting accounts / clearing test data
+
+Two separate things hold a person's data, and deleting one doesn't touch the
+other:
+
+| To remove... | Where |
+|---|---|
+| Their profile + progress (topic/case levels) | Admin panel → **Remove**, or delete the matching docs in Firestore's `users` and `progress` collections |
+| Their actual login | Firebase console → **Build → Authentication → Users** |
+
+**If sign-up says "That username is already taken" for a username you're sure
+you already deleted** — that's this exact split. You (or the admin panel)
+deleted the Firestore record, but the login in **Authentication → Users**
+is still there, and that's what sign-up actually checks against. Delete
+that row (search by `username@geo0460-mentoring.local`) and the username
+frees up immediately.
+
+**To wipe everything at once** (e.g. clearing all test accounts before real
+students sign up): in Firestore's **Data** tab, hover the `users` collection
+name → the **⋮** that appears → **Delete collection** (confirms by asking
+you to type the collection name, then recursively deletes every document in
+it) — repeat for `progress`. Then in **Authentication → Users**, select all
+rows and **Delete accounts**.
+
 ## Notes
 
 - **This needs to be viewed over `http(s)://`**, not by double-clicking the
