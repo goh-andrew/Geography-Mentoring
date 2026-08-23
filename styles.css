@@ -76,7 +76,6 @@ a{color:var(--current);}
 .case-row.mentor-mode{display:block;padding:14px 0;}
 .case-row.mentor-mode .case-row-head{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;}
 .case-row.mentor-mode .mentor-status-list{margin-top:12px;}
-.case-row.mentor-mode .code{color:var(--current);background:var(--paper);}
 
 /* case-study cross-section + list (sits on the light band background, not the dark hero) */
 #cases .transect{margin-top:22px;}
@@ -90,7 +89,7 @@ a{color:var(--current);}
 .case-list{margin-top:20px;}
 .case-row{display:grid;grid-template-columns:52px 1fr auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--rule);cursor:pointer;}
 .case-row:first-child{border-top:1px solid var(--rule);}
-.case-row .code{color:var(--current);font-size:13px;}
+.case-row .code{color:var(--current);background:var(--paper);font-size:13px;}
 .case-row-title{margin:0;font-weight:600;}
 .case-row-src{margin:4px 0 0;color:var(--muted);font-family:var(--mono);font-size:12.5px;}
 .case-status{margin:0;padding:0;border-top:0;flex-wrap:wrap;}
