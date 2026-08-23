@@ -49,11 +49,14 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    function isMyMentor(uid) {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(uid)).data.mentorUid == request.auth.uid;
+    }
+
     match /progress/{uid} {
-      allow read: if isSelf(uid) || isAdmin() ||
-        (request.auth != null &&
-         get(/databases/$(database)/documents/users/$(uid)).data.mentorUid == request.auth.uid);
-      allow write: if isSelf(uid);
+      allow read: if isSelf(uid) || isAdmin() || isMyMentor(uid);
+      allow write: if isSelf(uid) || isAdmin() || isMyMentor(uid);
       allow delete: if isAdmin();
     }
   }
@@ -66,8 +69,16 @@ can see the (non-secret) list of usernames and roles; a normal person can
 create their own profile and change only their own mentor choice; an
 **admin** (see step 7) can edit or delete *anyone's* profile — role, mentor
 assignment, admin status — and read or delete anyone's progress; and a
-mentor can additionally *read* the progress of any mentee whose profile
-names them as the mentor.
+mentor can additionally *read and write* the progress of any mentee whose
+profile names them as the mentor — so a mentor can mark a mentee's topic and
+case-study status on their behalf, e.g. during a session together, the same
+way the mentee could themselves.
+
+> **Trust note:** this means a mentee's self-assessed progress is no longer
+> theirs alone to edit — their mentor can change it too. That's the point
+> (a mentor working through a topic with a mentee can tick it off there and
+> then), but it's a real shift from "only I can touch my own data," worth
+> being aware of if that ever matters for how you present this to students.
 
 > If you already published an earlier version of these rules and are seeing
 > a **"Could not load mentors"** / `permission-denied` error on the sign-up

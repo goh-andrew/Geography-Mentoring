@@ -53,6 +53,28 @@ a{color:var(--current);}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--mono);font-size:11px;color:#8FA6A4;padding:10px 0 26px;}
 .legend span{display:inline-flex;align-items:center;gap:7px;}
 .key{width:11px;height:11px;display:inline-block;}
+.mentee-legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-family:var(--mono);font-size:11px;color:#A9C0BE;padding:0 0 26px;margin-top:-16px;}
+.mentee-legend .m{display:inline-flex;align-items:center;gap:7px;}
+.mentee-legend .sw{width:10px;height:10px;border-radius:50%;display:inline-block;flex:0 0 auto;}
+.mentee-legend b{color:#F3F7F5;font-weight:600;}
+.mentee-empty-note{font-family:var(--body);font-size:13px;color:var(--muted);}
+
+/* mentor editing a mentee's status, per mentee — used in both the topic
+   status bar and case-study rows */
+.mentor-status-list{display:flex;flex-direction:column;gap:10px;margin-top:6px;flex:1 1 100%;}
+.mentor-status-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.mentor-status-row .mn{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:600;}
+.mentor-status-row .mini-btns{display:flex;gap:6px;flex-wrap:wrap;}
+.mini-btns button{font-family:var(--mono);font-size:10px;letter-spacing:.04em;background:none;border:1px solid var(--rule);padding:5px 9px;cursor:pointer;color:var(--muted);}
+.mini-btns button[aria-pressed="true"]{background:var(--shelf);border-color:var(--shelf);color:#fff;}
+.mini-btns button:hover{border-color:var(--current);color:var(--current);}
+.mini-btns button[aria-pressed="true"]:hover{color:#fff;}
+
+/* case rows switch to a stacked layout in mentor view — the 3-way grid
+   doesn't have room for a full per-mentee status list */
+.case-row.mentor-mode{display:block;padding:14px 0;}
+.case-row.mentor-mode .case-row-head{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;}
+.case-row.mentor-mode .mentor-status-list{margin-top:12px;}
 
 /* case-study cross-section + list (sits on the light band background, not the dark hero) */
 #cases .transect{margin-top:22px;}
