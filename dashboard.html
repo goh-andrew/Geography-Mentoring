@@ -44,6 +44,14 @@
       <tbody><tr><td colspan="6">Loading&hellip;</td></tr></tbody>
     </table></div>
     <p class="auth-note" id="adminMsg"></p>
+
+    <form class="auth-form" id="inviteForm" style="max-width:420px;margin-top:34px;">
+      <h3 style="font-size:17px;">Mentor invite code</h3>
+      <p class="band-sub" style="margin:6px 0 0;">Required to sign up as a mentor. Change it any time to invalidate the old one — anyone who already has an account keeps their access either way.</p>
+      <label>Current code<input type="text" id="inviteCodeInput" placeholder="Loading&hellip;" autocomplete="off"></label>
+      <p class="auth-error" id="inviteMsg"></p>
+      <button type="submit" class="acct-btn acct-btn-solid">Save code</button>
+    </form>
   </section>
 </main>
 
@@ -191,6 +199,29 @@ async function loadAdminPanel(){
   }));
 }
 
+/* ==================== mentor invite code ==================== */
+async function loadInviteCode(){
+  const input=document.getElementById('inviteCodeInput');
+  const msg=document.getElementById('inviteMsg');
+  input.value=''; input.placeholder='Loading…';
+  try{
+    const snap=await getDoc(doc(db,'config','mentorInvite'));
+    input.value = snap.exists() ? (snap.data().code||'') : '';
+    input.placeholder = snap.exists() ? '' : 'Not set yet — pick a code below';
+  }catch(e){ msg.style.color='var(--lava)'; msg.textContent='Could not load the current code: '+friendlyAuthError(e); }
+}
+document.getElementById('inviteForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const msg=document.getElementById('inviteMsg');
+  const value=document.getElementById('inviteCodeInput').value.trim();
+  msg.style.color=''; msg.textContent='';
+  if(!value){ msg.style.color='var(--lava)'; msg.textContent='Enter a code — it can\'t be blank.'; return; }
+  try{
+    await setDoc(doc(db,'config','mentorInvite'), {code:value});
+    msg.style.color='var(--current)'; msg.textContent='Saved. Anyone signing up as a mentor now needs this exact code.';
+  }catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); }
+});
+
 /* ==================== auth state ==================== */
 if(fbReady){
   onAuthStateChanged(auth, async user=>{
@@ -222,6 +253,7 @@ if(fbReady){
       if(currentUser.isAdmin){
         document.getElementById('adminSection').hidden=false;
         loadAdminPanel();
+        loadInviteCode();
       }
     }catch(e){ console.warn('auth state handling failed', e); showGate('Something went wrong', friendlyAuthError(e)); }
   });

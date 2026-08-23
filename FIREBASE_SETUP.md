@@ -58,10 +58,14 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // deliberately no rule for /config/{document=**} — default-deny means no
-    // client can ever read or write it. The invite-code check above still
-    // works because rules evaluate get() with full backend access,
-    // regardless of what read permission the path itself has.
+    // only admins can read/write config docs (e.g. the mentor invite code)
+    // from the site itself — everyone else gets default-deny. The
+    // invite-code check above still works for a non-admin signup attempt
+    // because rules evaluate get() with full backend access, regardless of
+    // what read permission the path itself has.
+    match /config/{document} {
+      allow read, write: if isAdmin();
+    }
 
     function isMyMentor(uid) {
       return request.auth != null &&
@@ -105,14 +109,21 @@ e.g. during a session together, the same way the mentee could themselves.
 
 Anyone signing up with the role **Mentor** has to enter this code, and it's
 checked by the security rule you just published — not just the page, so it
-can't be bypassed from the browser console.
+can't be bypassed from the browser console. This first-time setup has to be
+done directly in the Firebase console, since there's no admin yet to use the
+dashboard's version of this (see below):
 
 1. Firebase console → **Build → Firestore Database → Data**.
 2. Click **Start collection**, name it exactly `config`.
 3. For the first document, set the **Document ID** to exactly `mentorInvite` (don't use "Auto-ID").
 4. Add one field: name `code`, type **string**, value whatever phrase you want people to type (e.g. `geo0460-mentor-2026`). Save.
 
-Change this value any time to invalidate the old code (e.g. if it's shared more widely than you intended) — nobody can read this document from the site itself, only the security rule can check against it.
+Once you have an admin (step 7), you don't need to come back here again —
+the **Manage everyone** panel on [dashboard.html](dashboard.html) has a
+"Mentor invite code" box where any admin can view and change it, e.g. to
+rotate it if it's been shared more widely than intended. Only admins can
+read or write this document from the site at all — everyone else, including
+a plain mentor, gets denied even trying, by the security rule.
 
 ## 5. Get your web app config
 
