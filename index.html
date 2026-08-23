@@ -196,13 +196,6 @@ body[data-track="mentor"] .panel{background:rgba(201,138,46,.09);}
 .paper p{margin:0;font-size:14px;color:var(--muted);}
 .paper .time{font-family:var(--mono);font-size:11px;color:var(--current);letter-spacing:.08em;margin-top:10px;display:block;}
 
-/* enquiry route */
-.route{counter-reset:step;margin-top:24px;border-top:1px solid var(--rule);}
-.route-step{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--rule);}
-.route-step .n{font-family:var(--mono);font-size:12px;color:var(--current);padding-top:3px;}
-.route-step h4{font-size:16px;font-weight:600;margin-bottom:3px;}
-.route-step p{margin:0;color:var(--muted);font-size:14.5px;}
-
 footer{background:var(--abyss);color:#8FA6A4;margin-top:40px;padding:40px 0;font-size:13.5px;}
 footer strong{color:#DCE7E4;}
 footer a{color:var(--reef);}
@@ -362,7 +355,7 @@ footer a{color:var(--reef);}
           <article class="paper">
             <span class="pct">27.5%</span>
             <h4>Paper 4 — Alternative to Coursework</h4>
-            <p>60 marks, all compulsory. Same five criteria as coursework, tested through written fieldwork tasks and hypothesis testing.</p>
+            <p>60 marks, all compulsory. Marked to the five criteria below, tested through written fieldwork tasks and hypothesis testing.</p>
             <span class="time">1 h 30 min &middot; externally assessed</span>
           </article>
         </div>
@@ -402,8 +395,7 @@ footer a{color:var(--reef);}
       <section class="band" id="fieldwork">
         <div class="band-head"><span class="band-num">Enquiry</span><h2>Fieldwork and Paper 4</h2></div>
         <p class="band-sub">Remember what you learned in Vietnam!</p>
-        <div class="route" id="route"></div>
-        <div id="p4-notes" style="margin-top:26px;"></div>
+        <div id="p4-notes" style="margin-top:24px;"></div>
       </section>
 
       <section class="band" id="commands">
@@ -413,8 +405,8 @@ footer a{color:var(--reef);}
           <thead><tr><th style="width:130px">Command</th><th>What the examiner wants</th></tr></thead>
           <tbody></tbody>
         </table></div>
-        <h3 style="margin-top:34px;font-size:20px;">Coursework levels, in plain terms</h3>
-        <p class="band-sub">Five criteria, 12 marks each, three levels. This is also the shape of Paper 4's mark allocation.</p>
+        <h3 style="margin-top:34px;font-size:20px;">Paper 4 mark levels, in plain terms</h3>
+        <p class="band-sub">Five criteria, 12 marks each, three levels — the shape of Paper 4's mark allocation.</p>
         <div class="datawrap"><table class="data">
           <thead><tr><th>Criterion</th><th>Level 1 (1–4)</th><th>Level 2 (5–8)</th><th>Level 3 (9–12)</th></tr></thead>
           <tbody>
@@ -432,7 +424,7 @@ footer a{color:var(--reef);}
 
 <footer>
   <div class="wrap">
-    <p><strong>Built against</strong> the Cambridge IGCSE Geography 0460 syllabus for 2025 and 2026 (version 2). Syllabus wording is paraphrased. The revision material is a study aid rather than a verified source — check figures and dates before using them in an exam answer, and sketch the diagrams (pyramids, models, landforms) by hand as you go.</p>
+    <p><strong>Built against</strong> the Cambridge IGCSE Geography 0460 syllabus for 2025 and 2026 (version 2).</p>
     <p>Progress is saved on this device only. <button type="button" id="reset" style="font-family:var(--mono);font-size:11px;background:none;border:1px solid rgba(255,255,255,.25);color:#8FA6A4;padding:6px 10px;cursor:pointer;">Reset progress</button></p>
   </div>
 </footer>
@@ -649,16 +641,6 @@ const CMDS = [
 ["Sketch","A simple freehand drawing showing key features, with care over proportions."],
 ["State","Express in clear terms."],
 ["Suggest","Apply knowledge to a situation where several answers are valid; propose and consider."]
-];
-
-const ROUTE = [
-["Identify the issue, question or problem","Spot a topic through observation, discussion, reading or previous study, then design hypotheses to test it."],
-["Define the objectives","Say what the study is for in specific terms, and decide what data are relevant and how they can be collected."],
-["Collect the data","Fieldwork for primary data — questionnaires, mapping, sketching, observation, counts, measurements — plus secondary sources such as census data, maps and published material."],
-["Select and collate the data","Data may be gathered as a group, but you choose the data that develop your own aims or hypotheses."],
-["Present and record the results","Record individually and present findings using a variety of maps, graphs and diagrams — chosen to suit the data."],
-["Analyse and interpret","Describe the patterns, then explain them using relevant geographical concepts. Refer back to the hypothesis."],
-["Conclude and evaluate","Judge whether the hypothesis holds, comment on the reliability of the data and the methods, and suggest improvements and further work."]
 ];
 
 /* ---------------- storage ---------------- */
@@ -992,10 +974,6 @@ function drawCaseProfile(){
 }
 
 function renderStatic(){
-  const r=document.getElementById('route');
-  ROUTE.forEach((s,i)=>{
-    r.appendChild(el('div','route-step','<div class="n">0'+(i+1)+'</div><div><h4>'+s[0]+'</h4><p>'+s[1]+'</p></div>'));
-  });
   const cb=document.querySelector('#cmd-table tbody');
   CMDS.forEach(([a,b])=>cb.appendChild(el('tr','','<td class="mono">'+a+'</td><td>'+b+'</td>')));
   const p4=NOTES.filter(n=>n.topic==='P4');
