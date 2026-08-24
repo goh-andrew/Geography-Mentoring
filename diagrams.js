@@ -153,9 +153,9 @@ ${[[110,90],[150,95],[190,88],[130,100]].map(([x,y])=>`<line x1="${x}" y1="${y}"
 <text x="150" y="300" style="${F}font-size:8px;fill:${MUTED}">throughflow &amp; groundwater flow (to river &amp; sea)</text>
 <path d="M220,168 Q260,220 340,235 Q400,246 460,250 L640,235" stroke="${SHELF}" stroke-width="6" fill="none" stroke-linecap="round"/>
 <path d="M220,168 Q260,220 340,235 Q400,246 460,250 L640,235" stroke="#3E8FA6" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
-<text x="380" y="270" style="${F}font-size:10px;font-weight:600;fill:${INK}">river</text>
 <path d="M440,165 L640,235 L640,340 L360,340 Z" fill="${SEA}"/>
 <path d="M440,165 L640,235" stroke="${SEA_DEEP}" stroke-width="1.5" opacity="0.6"/>
+<text x="380" y="270" style="${F}font-size:10px;font-weight:600;fill:${INK}">river</text>
 <text x="560" y="300" style="${F}font-size:12px;font-weight:600;fill:${INK}">sea</text>
 </svg>`
   },
@@ -176,7 +176,7 @@ ${[[110,90],[150,95],[190,88],[130,100]].map(([x,y])=>`<line x1="${x}" y1="${y}"
 <polygon points="20,50 45,10 70,50" fill="${ROCK_SOFT}"/>
 <polygon points="38,50 45,32 52,50" fill="${SEA_DEEP}"/>
 <path d="M20,50 L45,10 L70,50" fill="none" stroke="${INK}" stroke-width="2"/>
-<text x="45" y="65" text-anchor="middle" style="${F}font-size:9px;fill:${MUTED}">V-shaped valley,<tspan x="45" dy="10">steep sides</tspan></text>
+<text x="45" y="95" text-anchor="middle" style="${F}font-size:9px;fill:${MUTED}">V-shaped valley,<tspan x="45" dy="10">steep sides</tspan></text>
 </g>
 <g transform="translate(280,30)">
 <polygon points="5,45 25,14 65,14 85,45" fill="${ROCK_SOFT}"/>
@@ -210,7 +210,8 @@ ${[0,1,2].map(i=>`<rect x="0" y="${68+i*24}" width="80" height="24" fill="${i%2=
 </g>
 <path d="M0,60 L78,66 L95,50 L112,66 L190,60" fill="none" stroke="${INK}" stroke-width="2"/>
 <polygon points="88,50 95,32 102,50" fill="${SEDIMENT}"/>
-<path d="M55,80 L80,68 M135,80 L110,68" stroke="${INK}" stroke-width="2" marker-end="url(#arrR2)"/>
+<path d="M80,68 L55,80" stroke="${INK}" stroke-width="2" marker-end="url(#arrL2)"/>
+<path d="M110,68 L135,80" stroke="${INK}" stroke-width="2" marker-end="url(#arrR2)"/>
 <rect x="0" y="60" width="190" height="90" fill="none" stroke="${INK}" stroke-width="1.5"/>
 <text x="95" y="168" text-anchor="middle" style="${F}font-size:10.5px;font-weight:600;fill:${INK}">Constructive</text>
 <text x="95" y="181" text-anchor="middle" style="${F}font-size:8.5px;fill:${MUTED}">plates move apart —<tspan x="95" dy="10">magma rises to fill the gap,</tspan><tspan x="95" dy="10">building a mid-ocean ridge</tspan></text>
@@ -254,7 +255,7 @@ ${[0,1,2].map(i=>`<rect x="0" y="${68+i*24}" width="85" height="24" fill="${i%2=
 
   "longshore-drift": {
     caption: "Longshore drift — the zigzag movement of beach material, and how a groyne interrupts it",
-    svg: `<svg viewBox="0 0 560 280" role="img" aria-label="Longshore drift showing swash moving material up the beach at an angle and backwash moving it straight back, with a groyne trapping sediment">
+    svg: `<svg viewBox="0 0 560 310" role="img" aria-label="Longshore drift showing swash moving material up the beach at an angle and backwash moving it straight back, with a groyne trapping sediment">
 <path d="M0,0 L560,0 L560,150 L0,190 Z" fill="${SEA}"/>
 ${[0,1,2,3].map(i=>`<path d="M0,${20+i*8} Q90,${5+i*8} 180,${20+i*8} Q270,${35+i*8} 360,${20+i*8} Q450,${5+i*8} 540,${20+i*8}" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="${0.55-i*0.1}"/>`).join('')}
 <path d="M0,190 L560,150 L560,260 L0,260 Z" fill="${SAND}"/>
@@ -275,7 +276,7 @@ ${[0,1,2,3,4].map(i=>{
 ${lines(10,78,9,MUTED,["prevailing","wind &amp; wave"])}
 <circle cx="26" cy="272" r="4" fill="${LAVA}"/><text x="36" y="276" style="${F}font-size:9px;fill:${INK}">sediment particle path</text>
 <line x1="200" y1="272" x2="216" y2="272" stroke="${CURRENT}" stroke-width="2.5"/><text x="222" y="276" style="${F}font-size:9px;fill:${INK}">swash — angled up by the wave</text>
-${lines(345,272,8,MUTED,["sediment builds up on the","updrift side of the groyne"])}
+${lines(20,294,8,MUTED,["sediment builds up on the updrift side of the groyne"])}
 <defs>
 <marker id="swash" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="${CURRENT}"/></marker>
 <marker id="backwash" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="${SEDIMENT}"/></marker>
@@ -314,7 +315,7 @@ ${lines(30,215,10,INK,["magma chamber"])}
 ${lines(320,110,10,INK,["layers of ash","&amp; lava"])}
 <line x1="290" y1="183" x2="400" y2="200" stroke="${MUTED}" stroke-width="1"/>
 ${lines(320,215,10,INK,["side vent"])}
-<line x1="320" y1="220" x2="415" y2="245" stroke="${MUTED}" stroke-width="1"/>
+<line x1="300" y1="232" x2="415" y2="245" stroke="${MUTED}" stroke-width="1"/>
 ${lines(320,260,10,INK,["lava flow"])}
 </svg>`
   },
@@ -340,7 +341,7 @@ ${[[-1,26],[1,34],[-1,44]].map(([d,l])=>`<path d="M260,80 L${260+d*l*0.6},${80+l
 <polygon points="220,80 225,50 245,50 250,80" fill="#A69C8C" stroke="${INK}"/>
 <polygon points="255,80 260,62 275,62 280,80" fill="#B8AFA0" stroke="${INK}"/>
 <rect x="228" y="58" width="6" height="8" fill="${SEA}"/><rect x="238" y="58" width="6" height="8" fill="${SEA}"/>
-${lines(285,70,11,INK,["epicentre — point on the","surface right above the focus"])}
+${lines(265,54,11,INK,["epicentre — point on the","surface right above the focus"])}
 ${lines(285,205,11,INK,["focus — where the","earthquake starts,","along the fault"])}
 ${lines(30,55,10,MUTED,["seismic waves spread"])}
 <line x1="130" y1="150" x2="30" y2="150" stroke="${MUTED}" stroke-width="1"/>
@@ -382,7 +383,7 @@ ${[[220,45,-25],[240,52,15],[290,40,-20],[310,50,20],[350,44,-15]].map(([x,y,r])
 ${[["Soft rock",60,"bay — erodes faster"],["Hard rock",220,"headland — resists erosion"],["Soft rock",380,"bay — erodes faster"]].map(([t,x,sub])=>
  `<text x="${x+60}" y="35" text-anchor="middle" style="${F}font-size:10.5px;font-weight:600;fill:${INK}">${t}</text>`+
  `<text x="${x+60}" y="48" text-anchor="middle" style="${F}font-size:8.5px;fill:${MUTED}">${sub}</text>`).join('')}
-<line x1="120" y1="8" x2="120" y2="130" stroke="${INK}" stroke-width="1" stroke-dasharray="3 3"/>
+<line x1="170" y1="8" x2="170" y2="130" stroke="${INK}" stroke-width="1" stroke-dasharray="3 3"/>
 <line x1="340" y1="8" x2="340" y2="130" stroke="${INK}" stroke-width="1" stroke-dasharray="3 3"/>
 <line x1="10" y1="180" x2="550" y2="180" stroke="${RULE}"/>
 <text x="16" y="176" style="${F}font-size:10px;font-weight:600;fill:${INK}">The headland is then eroded back over time:</text>
@@ -422,10 +423,10 @@ ${[[200,160],[208,168],[196,172],[213,178]].map(([x,y])=>`<line x1="${x}" y1="${
 <line x1="40" y1="40" x2="90" y2="75" stroke="${INK}" stroke-width="2" marker-end="url(#spitArr)"/>
 ${lines(15,30,9.5,MUTED,["prevailing wind","&amp; waves"])}
 <path d="M100,90 C150,110 200,125 260,150" fill="none" stroke="${CURRENT}" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#spitArr)"/>
-${lines(90,110,9.5,CURRENT,["longshore drift"])}
+${lines(90,145,9.5,CURRENT,["longshore drift"])}
 ${lines(300,140,10.5,INK,["spit — sand &amp; shingle","deposited past the","bend in the coast"])}
 ${lines(210,205,10.5,INK,["recurved end — bent by","a second wave direction"])}
-${lines(150,175,9.5,VEG,["salt marsh (sheltered","water behind the spit)"])}
+${lines(150,230,9.5,VEG,["salt marsh (sheltered","water behind the spit)"])}
 <defs><marker id="spitArr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="${INK}"/></marker></defs>
 </svg>`
   },
@@ -454,7 +455,7 @@ ${p.d.split("\\n").map((l,j)=>`<text x="80" y="${36+j*11}" text-anchor="middle" 
 
   "meander-oxbow-formation": {
     caption: "How a meander becomes an oxbow lake",
-    svg: `<svg viewBox="0 0 580 220" role="img" aria-label="Four stages showing a meander bend tightening until the river cuts through the neck and leaves an oxbow lake">
+    svg: `<svg viewBox="0 0 580 250" role="img" aria-label="Four stages showing a meander bend tightening until the river cuts through the neck and leaves an oxbow lake">
 ${[
   {ox:10, title:"1 · Meander forms", body:`<path d="M10,110 Q60,60 110,110 Q160,160 210,110" fill="none" stroke="${CURRENT}" stroke-width="10" stroke-linecap="round"/>
     <path d="M10,110 Q60,60 110,110 Q160,160 210,110" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.5" stroke-linecap="round"/>`},
@@ -477,7 +478,7 @@ ${[
 ${p.body}
 <text x="105" y="0" text-anchor="middle" style="${F}font-size:10.5px;font-weight:600;fill:${INK}">${p.title}</text>
 </g>`).join('')}
-<text x="290" y="200" text-anchor="middle" style="${F}font-size:9px;fill:${MUTED}"><tspan x="290" dy="0">outer bank erodes (fast current) · inner bank deposits (slow current)</tspan><tspan x="290" dy="12">neck is cut through in a flood, and the old loop is abandoned</tspan></text>
+<text x="290" y="230" text-anchor="middle" style="${F}font-size:9px;fill:${MUTED}"><tspan x="290" dy="0">outer bank erodes (fast current) · inner bank deposits (slow current)</tspan><tspan x="290" dy="12">neck is cut through in a flood, and the old loop is abandoned</tspan></text>
 <defs><marker id="mArr" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="${INK}"/></marker></defs>
 </svg>`
   },
