@@ -192,6 +192,9 @@ body[data-track="mentor"] .panel{background:rgba(201,138,46,.09);}
 .note-sec ul ul{margin:4px 0;}
 .note-sec li::marker{color:var(--reef);}
 .tablewrap{overflow-x:auto;margin:12px 0;}
+.diagram{margin:14px 0;padding:16px;background:var(--paper);border:1px solid var(--rule);}
+.diagram svg{display:block;width:100%;height:auto;max-width:640px;margin:0 auto;overflow:visible;}
+.diagram figcaption{margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;letter-spacing:.02em;}
 .note-sec table{border-collapse:collapse;font-size:13.5px;min-width:520px;width:100%;}
 .note-sec th,.note-sec td{border:1px solid var(--rule);padding:7px 9px;vertical-align:top;text-align:left;}
 .note-sec th{background:rgba(19,75,90,.07);font-weight:600;}
