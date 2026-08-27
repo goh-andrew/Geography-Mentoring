@@ -941,11 +941,11 @@ function switchAuthTab(tab){
   document.getElementById('signupForm').hidden = tab!=='signup';
   document.getElementById('loginError').textContent='';
   document.getElementById('signupError').textContent='';
+  // populate the mentor picker whenever the signup form is shown, no matter how
+  // we got here (header "Sign up" button, the in-modal tab, or a track switch)
+  if(tab==='signup') loadMentorOptions(document.getElementById('suMentor'));
 }
-document.querySelectorAll('.modal-tab').forEach(b=>b.addEventListener('click',()=>{
-  switchAuthTab(b.dataset.authTab);
-  if(b.dataset.authTab==='signup') loadMentorOptions(document.getElementById('suMentor'));
-}));
+document.querySelectorAll('.modal-tab').forEach(b=>b.addEventListener('click',()=>switchAuthTab(b.dataset.authTab)));
 
 document.querySelectorAll('input[name="suRole"]').forEach(r=>r.addEventListener('change',()=>{
   const isMentee=document.querySelector('input[name="suRole"]:checked').value==='mentee';
