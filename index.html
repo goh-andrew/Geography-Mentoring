@@ -40,7 +40,7 @@
     <h1>IGCSE Geography</h1>
 
     <div class="switch" role="group" aria-label="Choose your view">
-      <button type="button" id="trackMenteeBtn" data-set-track="mentee" aria-pressed="true">I'm a mentee</button>
+      <button type="button" id="trackMenteeBtn" data-set-track="mentee" aria-pressed="true">I'm a student</button>
       <button type="button" id="trackMentorBtn" data-set-track="mentor" aria-pressed="false">I'm a mentor</button>
     </div>
     <p class="switch-note"></p>
@@ -75,7 +75,7 @@
       </div>
       <div class="rail-group" id="railDashboard" hidden>
         <h4>Mentoring</h4>
-        <a href="dashboard.html">Mentor / admin dashboard</a>
+        <a href="dashboard.html">Mentor / teacher / admin dashboard</a>
       </div>
       <div class="rail-group">
         <h4>Themes</h4>
@@ -98,7 +98,7 @@
         <div class="band-head"><span class="band-num">00</span><h2>How to use this</h2></div>
         <div class="paths">
           <article class="path" data-for="mentee">
-            <p class="role">Mentee</p>
+            <p class="role">Student</p>
             <h3>Work one topic at a time</h3>
             <ol>
               <li>Open a topic and read <strong>what the syllabus asks</strong> first</li>
@@ -277,16 +277,17 @@
       <label>Password<input type="password" id="suPassword" autocomplete="new-password" required minlength="6"></label>
       <fieldset class="auth-role">
         <legend>I am a</legend>
-        <label><input type="radio" name="suRole" value="mentee" checked> Mentee</label>
+        <label><input type="radio" name="suRole" value="mentee" checked> Student</label>
         <label><input type="radio" name="suRole" value="mentor"> Mentor</label>
+        <label><input type="radio" name="suRole" value="teacher"> Teacher</label>
       </fieldset>
-      <label id="suMentorWrap">Your mentor
-        <select id="suMentor"><option value="">Loading mentors&hellip;</option></select>
+      <label id="suMentorWrap">Your mentor or teacher
+        <select id="suMentor"><option value="">Loading&hellip;</option></select>
       </label>
       <label id="suInviteWrap" hidden>Mentor invite code
         <input type="text" id="suInviteCode" autocomplete="off">
       </label>
-      <p class="auth-note" id="suInviteNote" hidden>Ask Andrew or Rohan for the code. Your mentor account will need a quick admin approval before mentor features unlock.</p>
+      <p class="auth-note" id="suInviteNote" hidden>Ask Andrew or Rohan for the code. A mentor or teacher account needs a quick admin approval before those tools unlock.</p>
       <p class="auth-note">Passwords need at least 6 characters. Usernames are not case sensitive.</p>
       <p class="auth-error" id="signupError"></p>
       <button type="submit" class="acct-btn acct-btn-solid">Create account</button>
@@ -299,13 +300,21 @@
     <button type="button" class="modal-close" id="acctClose" aria-label="Close">&times;</button>
     <h3 id="acctPanelTitle">Your account</h3>
     <p class="auth-note" style="margin-top:0;"><b id="acctPanelName" style="color:var(--ink);font-family:var(--body)"></b> &middot; <span id="acctPanelRole"></span></p>
-    <p class="auth-note" id="acctPendingNote" hidden>Your mentor account is awaiting admin approval — you'll see the regular mentee view until then.</p>
+    <p class="auth-note" id="acctPendingNote" hidden>Your account is awaiting admin approval — you'll see the regular student view until then.</p>
     <div id="acctMenteeSettings" hidden>
       <label>Your mentor
         <select id="acctMentorSelect"></select>
       </label>
       <p class="auth-error" id="acctMentorMsg"></p>
     </div>
+
+    <form id="acctUsernameForm" class="auth-form" style="border-top:1px solid var(--rule);margin-top:18px;padding-top:2px;">
+      <label>Change username<input type="text" id="acctNewUsername" autocomplete="username" placeholder="new username" required></label>
+      <label>Current password<input type="password" id="acctUsernamePassword" autocomplete="current-password" required></label>
+      <p class="auth-note">Not case sensitive. You'll log in with the new name from now on.</p>
+      <p class="auth-error" id="acctUsernameMsg"></p>
+      <button type="submit" class="acct-btn acct-btn-solid">Change username</button>
+    </form>
   </div>
 </div>
 
@@ -314,7 +323,8 @@
    cloud.js (shared with dashboard.html). See FIREBASE_SETUP.md for setup. */
 import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword, deleteUser,
-  onAuthStateChanged, signOut
+  onAuthStateChanged, signOut,
+  EmailAuthProvider, reauthenticateWithCredential, updateEmail
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   doc, getDoc, setDoc, collection, query, where, getDocs
@@ -328,11 +338,15 @@ let currentUser=null; // {uid, username, role, mentorUid, isAdmin}
 let mentorMentees=[]; // for mentor accounts: [{uid, username, levels, caseLevels}]
 const MENTEE_COLORS=['#48B7A6','#C98A2E','#7C9CFF','#E0607E','#8BD17C','#F2B84B','#5EC8E8','#D98CD9'];
 
-// a mentor-role account only gets mentor features once an admin approves it
-// (or is themselves an admin) — a pending signup is treated as a mentee
+// a mentor- or teacher-role account only gets mentor features once an admin
+// approves it (or is themselves an admin) — a pending signup is treated as a
+// student. "teacher" is functionally identical to "mentor", just labelled
+// differently, so both roles flow through this same gate.
 function isFunctionalMentor(u){
-  return !!u && u.role==='mentor' && (u.mentorApproved===true || u.isAdmin===true);
+  return !!u && (u.role==='mentor' || u.role==='teacher') && (u.mentorApproved===true || u.isAdmin===true);
 }
+// the stored role value stays 'mentee' on the wire; only its label changed
+function roleLabel(role){ return role==='mentee' ? 'student' : role; }
 
 const CMDS = [
 ["Calculate","Work it out from the facts, figures or information given."],
@@ -477,11 +491,11 @@ function topicCard(t){
 
   const st=el('div','status');
   if(isFunctionalMentor(currentUser)){
-    st.innerHTML='<span class="lab">Mentees</span>';
+    st.innerHTML='<span class="lab">Students</span>';
     if(mentorMentees.length){
       st.appendChild(buildMentorStatusList('topic',t.code,m=>m.levels[t.code]||0,(menteeUid,v)=>setMenteeTopicLevel(menteeUid,t.code,v)));
     }else{
-      st.appendChild(el('span','mentee-empty-note','No mentees yet.'));
+      st.appendChild(el('span','mentee-empty-note','No students yet.'));
     }
   }else{
     st.innerHTML='<span class="lab">Status</span>';
@@ -501,7 +515,7 @@ function topicCard(t){
 function trackPanel(t){
   const track=document.body.dataset.track;
   if(track==='mentee'){
-    return '<span class="role-note">Mentee</span><h5>How to revise this</h5><ul>'+
+    return '<span class="role-note">Student</span><h5>How to revise this</h5><ul>'+
       t.mentee.do.map(d=>'<li>'+d+'</li>').join('')+'</ul>'+
       '<h5>Self-check — answer to the marks</h5><ul class="qs">'+
       t.mentee.q.map(q=>'<li><span>'+esc(q[0])+'</span><span class="marks">['+q[1]+']</span></li>').join('')+'</ul>';
@@ -638,7 +652,7 @@ function drawProfile(){
     if(!mentorMentees.length){
       const msg=svg('text',{x:L,y:100,class:'axis-label'});
       msg.setAttribute('font-size','13');
-      msg.textContent='No mentees yet — once a mentee picks you, their progress shows here.';
+      msg.textContent='No students yet — once a student picks you, their progress shows here.';
       s.appendChild(msg);
     }else{
       mentorMentees.forEach((m,mi)=>{
@@ -693,8 +707,8 @@ function drawProfile(){
 
   document.getElementById('topicKeyGroup').hidden=isMentor;
   if(isMentor){
-    document.getElementById('transect-h').textContent="Your mentees' progress through the syllabus";
-    document.getElementById('transect-count').textContent=mentorMentees.length ? mentorMentees.length+' mentee'+(mentorMentees.length===1?'':'s')+' shown' : 'No mentees yet';
+    document.getElementById('transect-h').textContent="Your students' progress through the syllabus";
+    document.getElementById('transect-count').textContent=mentorMentees.length ? mentorMentees.length+' student'+(mentorMentees.length===1?'':'s')+' shown' : 'No students yet';
     renderMenteeLegend();
   }else{
     document.getElementById('transect-h').textContent='Your progress through the syllabus';
@@ -748,7 +762,7 @@ function renderCaseList(){
       if(mentorMentees.length){
         row.appendChild(buildMentorStatusList('case',c.id,m=>m.caseLevels[c.id]||0,(menteeUid,v)=>setMenteeCaseLevel(menteeUid,c.id,v)));
       }else{
-        row.appendChild(el('p','mentee-empty-note','No mentees yet.'));
+        row.appendChild(el('p','mentee-empty-note','No students yet.'));
       }
       row.addEventListener('click',e=>{
         if(e.target.closest('button')) return;
@@ -826,7 +840,7 @@ function drawCaseProfile(){
     if(!mentorMentees.length){
       const msg=svg('text',{x:L,y:100,class:'case-axis-label'});
       msg.setAttribute('font-size','13');
-      msg.textContent='No mentees yet — once a mentee picks you, their case study confidence shows here.';
+      msg.textContent='No students yet — once a student picks you, their case study confidence shows here.';
       s.appendChild(msg);
     }else{
       mentorMentees.forEach((m,mi)=>{
@@ -875,8 +889,8 @@ function drawCaseProfile(){
   document.getElementById('caseKeyGroup').hidden=isMentor;
   document.getElementById('casesBandSub').hidden=isMentor;
   if(isMentor){
-    document.getElementById('case-transect-h').textContent="Cross-section — your mentees' case study confidence";
-    document.getElementById('case-transect-count').textContent=mentorMentees.length ? mentorMentees.length+' mentee'+(mentorMentees.length===1?'':'s')+' shown' : 'No mentees yet';
+    document.getElementById('case-transect-h').textContent="Cross-section — your students' case study confidence";
+    document.getElementById('case-transect-count').textContent=mentorMentees.length ? mentorMentees.length+' student'+(mentorMentees.length===1?'':'s')+' shown' : 'No students yet';
     renderCaseMenteeLegend();
   }else{
     document.getElementById('case-transect-h').textContent='Cross-section — your case study confidence';
@@ -955,16 +969,17 @@ document.querySelectorAll('input[name="suRole"]').forEach(r=>r.addEventListener(
 }));
 
 async function loadMentorOptions(sel){
-  sel.innerHTML='<option value="">Loading mentors&hellip;</option>';
+  sel.innerHTML='<option value="">Loading&hellip;</option>';
   if(!fbReady){ sel.innerHTML='<option value="">Accounts not set up yet</option>'; return; }
   try{
-    const snap=await getDocs(query(collection(db,'users'), where('role','==','mentor')));
-    // only approved mentors are choosable — a pending signup isn't a real mentor yet
+    // mentors and teachers are the same feature set — a student can be assigned to either
+    const snap=await getDocs(query(collection(db,'users'), where('role','in',['mentor','teacher'])));
+    // only approved ones are choosable — a pending signup isn't active yet
     const approved=snap.docs.filter(d=>{ const u=d.data(); return u.mentorApproved===true || u.isAdmin===true; });
-    if(!approved.length){ sel.innerHTML='<option value="">No approved mentors yet</option>'; return; }
-    sel.innerHTML='<option value="">Choose a mentor&hellip;</option>'+
-      approved.map(d=>'<option value="'+d.id+'">'+esc(d.data().username)+'</option>').join('');
-  }catch(e){ sel.innerHTML='<option value="">Could not load mentors</option>'; console.warn(e); }
+    if(!approved.length){ sel.innerHTML='<option value="">No mentors or teachers yet</option>'; return; }
+    sel.innerHTML='<option value="">Choose your mentor or teacher&hellip;</option>'+
+      approved.map(d=>{ const u=d.data(); return '<option value="'+d.id+'">'+esc(u.username)+' ('+esc(u.role)+')</option>'; }).join('');
+  }catch(e){ sel.innerHTML='<option value="">Could not load the list</option>'; console.warn(e); }
 }
 
 document.getElementById('signupForm').addEventListener('submit', async e=>{
@@ -977,8 +992,8 @@ document.getElementById('signupForm').addEventListener('submit', async e=>{
   const mentorUid=document.getElementById('suMentor').value;
   const inviteCode=document.getElementById('suInviteCode').value.trim();
   if(!username){ errEl.textContent='Enter a username.'; return; }
-  if(role==='mentee' && !mentorUid){ errEl.textContent='Choose your mentor.'; return; }
-  if(role==='mentor' && !inviteCode){ errEl.textContent='Enter the mentor invite code.'; return; }
+  if(role==='mentee' && !mentorUid){ errEl.textContent='Choose your mentor or teacher.'; return; }
+  if((role==='mentor'||role==='teacher') && !inviteCode){ errEl.textContent='Enter the invite code.'; return; }
   if(!fbReady){ errEl.textContent=friendlyAuthError(); return; }
   let cred=null;
   try{
@@ -993,14 +1008,14 @@ document.getElementById('signupForm').addEventListener('submit', async e=>{
     }
     closeModal(authBackdrop);
     document.getElementById('signupForm').reset();
-    if(role==='mentor'){
-      alert("Account created! A mentor account needs a quick admin approval before mentor tools unlock. You can log in any time — you'll just see the regular mentee view until then.");
+    if(role==='mentor'||role==='teacher'){
+      alert("Account created! A mentor or teacher account needs a quick admin approval before those tools unlock. You can log in any time — you'll just see the regular student view until then.");
     }
   }catch(e2){
     // the auth login was created before the Firestore write failed — clean it
     // up so the username isn't stuck "taken" by a profile-less account
     if(cred){ try{ await deleteUser(cred.user); }catch(cleanupErr){ console.warn('could not clean up orphaned auth account',cleanupErr); } }
-    if(role==='mentor' && e2 && e2.code==='permission-denied'){
+    if((role==='mentor'||role==='teacher') && e2 && e2.code==='permission-denied'){
       errEl.textContent='That invite code is wrong. Check it and try again.';
     }else{
       errEl.textContent=friendlyAuthError(e2);
@@ -1026,8 +1041,8 @@ document.getElementById('btnLogout').addEventListener('click',()=>{ if(fbReady) 
 document.getElementById('btnAccount').addEventListener('click', async ()=>{
   if(!currentUser) return;
   document.getElementById('acctPanelName').textContent=currentUser.username;
-  document.getElementById('acctPanelRole').textContent=currentUser.role;
-  document.getElementById('acctPendingNote').hidden = !(currentUser.role==='mentor' && !currentUser.isAdmin && !currentUser.mentorApproved);
+  document.getElementById('acctPanelRole').textContent=roleLabel(currentUser.role);
+  document.getElementById('acctPendingNote').hidden = !((currentUser.role==='mentor'||currentUser.role==='teacher') && !currentUser.isAdmin && !currentUser.mentorApproved);
   const menteeBox=document.getElementById('acctMenteeSettings');
   menteeBox.hidden = currentUser.role!=='mentee';
   if(currentUser.role==='mentee'){
@@ -1036,6 +1051,8 @@ document.getElementById('btnAccount').addEventListener('click', async ()=>{
     if(currentUser.mentorUid) sel.value=currentUser.mentorUid;
     document.getElementById('acctMentorMsg').textContent='';
   }
+  document.getElementById('acctUsernameForm').reset();
+  document.getElementById('acctUsernameMsg').textContent='';
   openModal(acctBackdrop);
 });
 document.getElementById('acctMentorSelect').addEventListener('change', async e=>{
@@ -1048,13 +1065,60 @@ document.getElementById('acctMentorSelect').addEventListener('change', async e=>
   }catch(err){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(err); }
 });
 
+/* Change username. The login identity is a fake email derived from the
+   username (see cloud.js), so a real rename means re-authenticating, moving
+   the Auth email, then updating the username field on the users + progress
+   docs. The Firestore write is guarded so the visible name and the login
+   name can't drift apart if one half fails. */
+document.getElementById('acctUsernameForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const msg=document.getElementById('acctUsernameMsg');
+  msg.style.color='var(--lava)';
+  if(!currentUser || !fbReady || !auth.currentUser){ msg.textContent=friendlyAuthError(); return; }
+  const newName=cleanUsername(document.getElementById('acctNewUsername').value);
+  const password=document.getElementById('acctUsernamePassword').value;
+  if(!newName){ msg.textContent='Enter a username using letters, numbers, dots, - or _.'; return; }
+  if(newName===currentUser.username){ msg.textContent='That is already your username.'; return; }
+  if(!password){ msg.textContent='Enter your current password.'; return; }
+  const btn=e.target.querySelector('button[type="submit"]');
+  const oldName=currentUser.username;
+  btn.disabled=true;
+  try{
+    const cred=EmailAuthProvider.credential(usernameToEmail(oldName), password);
+    await reauthenticateWithCredential(auth.currentUser, cred);
+    await updateEmail(auth.currentUser, usernameToEmail(newName));
+    try{
+      await setDoc(doc(db,'users',currentUser.uid), {username:newName}, {merge:true});
+      if(currentUser.role==='mentee'){
+        await setDoc(doc(db,'progress',currentUser.uid), {username:newName}, {merge:true});
+      }
+    }catch(docErr){
+      // put the Auth email back so login and display name stay in sync
+      try{ await updateEmail(auth.currentUser, usernameToEmail(oldName)); }catch(_){}
+      throw docErr;
+    }
+    currentUser.username=newName;
+    document.getElementById('acctPanelName').textContent=newName;
+    document.getElementById('acctName').textContent=newName;
+    e.target.reset();
+    msg.style.color='var(--current)';
+    msg.textContent='Username changed. Use "'+newName+'" next time you log in.';
+  }catch(err){
+    const c=err && err.code || '';
+    if(c==='auth/email-already-in-use'){ msg.textContent='That username is already taken.'; }
+    else if(c==='auth/requires-recent-login'){ msg.textContent='Please log out and back in, then try again.'; }
+    else if(c==='auth/operation-not-allowed'){ msg.textContent='Username changes are blocked by a Firebase setting — see FIREBASE_SETUP.md.'; }
+    else{ msg.textContent=friendlyAuthError(err); }
+  }finally{ btn.disabled=false; }
+});
+
 function setLoggedOutUI(){
   document.getElementById('acctGuest').hidden=false;
   document.getElementById('acctUser').hidden=true;
   document.getElementById('railDashboard').hidden=true;
   document.getElementById('acctDashboardBtn').hidden=true;
   document.getElementById('trackMentorBtn').hidden=false;
-  document.getElementById('trackMenteeBtn').textContent="I'm a mentee";
+  document.getElementById('trackMenteeBtn').textContent="I'm a student";
   setTrack('mentee');
   if(mentorMentees.length){
     mentorMentees=[];
@@ -1083,15 +1147,15 @@ function setLoggedInUI(user){
   document.getElementById('acctGuest').hidden=true;
   document.getElementById('acctUser').hidden=false;
   document.getElementById('acctName').textContent=user.username;
-  document.getElementById('acctRole').textContent=user.role+(user.isAdmin?' · admin':'')+(user.role==='mentor'&&!user.isAdmin&&!user.mentorApproved?' · pending':'');
+  document.getElementById('acctRole').textContent=roleLabel(user.role)+(user.isAdmin?' · admin':'')+((user.role==='mentor'||user.role==='teacher')&&!user.isAdmin&&!user.mentorApproved?' · pending':'');
   const isMentor=isFunctionalMentor(user);
   const showDash=isMentor||user.isAdmin;
   document.getElementById('railDashboard').hidden=!showDash;
   document.getElementById('acctDashboardBtn').hidden=!showDash;
-  // a mentee only ever sees their own (mentee) guidance — no mentor track to switch to;
-  // a mentor keeps both, but the "mentee" button becomes an explicit preview, not an identity claim
+  // a student only ever sees their own (student) guidance — no mentor track to switch to;
+  // a mentor/teacher keeps both, but the "student" button becomes an explicit preview, not an identity claim
   document.getElementById('trackMentorBtn').hidden=!isMentor;
-  document.getElementById('trackMenteeBtn').textContent=isMentor?'Mentee View':"I'm a mentee";
+  document.getElementById('trackMenteeBtn').textContent=isMentor?'Student View':"I'm a student";
   setTrack(isMentor?'mentor':'mentee');
 }
 
@@ -1114,7 +1178,7 @@ if(fbReady){
           await setDoc(doc(db,'progress',user.uid), {levels:state.levels||{},cases:state.cases||{},caseLevels:state.caseLevels||{},username:currentUser.username,updatedAt:Date.now()});
         }
         refreshAll();
-      }else if(currentUser.role==='mentor'){
+      }else if(currentUser.role==='mentor' || currentUser.role==='teacher'){
         loadMentorMenteesData(user.uid);
       }
     }catch(e){ console.warn('auth state handling failed', e); }

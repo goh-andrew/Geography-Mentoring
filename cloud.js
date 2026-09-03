@@ -1,6 +1,7 @@
 /* =====================================================================
    Cloud accounts (Firebase) — shared setup for index.html and
-   dashboard.html. Mentor/mentee login and progress sync run on this.
+   dashboard.html. Mentor/teacher/student login and progress sync run on
+   this. ("mentee" is still the stored role value for a student.)
 
    Setup required before this works: create a free Firebase project,
    turn on Email/Password sign-in, create a Firestore database, paste

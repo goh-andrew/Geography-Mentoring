@@ -15,7 +15,7 @@
 
 <header class="topbar">
   <div class="wrap">
-    <h1>Mentor &amp; Admin Dashboard</h1>
+    <h1>Mentor, Teacher &amp; Admin Dashboard</h1>
     <div class="acct-user" id="acctUser" hidden>
       <span class="acct-who"><b id="acctName"></b><span class="acct-role-tag" id="acctRole"></span></span>
       <a class="acct-btn" href="index.html">Back to site</a>
@@ -32,8 +32,8 @@
   </div>
 
   <section class="band" id="menteesSection" hidden>
-    <div class="band-head"><span class="band-num">Mentoring</span><h2>My mentees</h2></div>
-    <p class="band-sub">Progress synced from each mentee's own device the last time they had it open.</p>
+    <div class="band-head"><span class="band-num">Mentoring</span><h2>My students</h2></div>
+    <p class="band-sub">Progress synced from each student's own device the last time they had it open.</p>
     <div class="mentee-list" id="menteeList"></div>
   </section>
 
@@ -48,7 +48,7 @@
 
     <form class="auth-form" id="inviteForm" style="max-width:420px;margin-top:34px;">
       <h3 style="font-size:17px;">Mentor invite code</h3>
-      <p class="band-sub" style="margin:6px 0 0;">Required to sign up as a mentor. Change it any time to invalidate the old one — anyone who already has an account keeps their access either way.</p>
+      <p class="band-sub" style="margin:6px 0 0;">Required to sign up as a mentor or teacher. Change it any time to invalidate the old one — anyone who already has an account keeps their access either way.</p>
       <label>Current code<input type="text" id="inviteCodeInput" placeholder="Loading&hellip;" autocomplete="off"></label>
       <p class="auth-error" id="inviteMsg"></p>
       <button type="submit" class="acct-btn acct-btn-solid">Save code</button>
@@ -74,6 +74,11 @@ function caseFlat(){
 
 let currentUser=null;
 
+// the stored role value stays 'mentee' on the wire; only its label changed.
+// 'teacher' is functionally identical to 'mentor', just labelled differently.
+function roleLabel(role){ return role==='mentee' ? 'student' : role; }
+function isStaffRole(role){ return role==='mentor' || role==='teacher'; }
+
 function showGate(title, msg){
   document.getElementById('gateTitle').textContent=title;
   document.getElementById('gateMsg').textContent=msg;
@@ -87,10 +92,10 @@ document.getElementById('btnLogout').addEventListener('click',()=>{ if(fbReady) 
 /* ==================== mentor: my mentees ==================== */
 async function loadMentorDashboard(uid){
   const host=document.getElementById('menteeList');
-  host.innerHTML='<p class="mentee-empty">Loading your mentees&hellip;</p>';
+  host.innerHTML='<p class="mentee-empty">Loading your students&hellip;</p>';
   try{
     const snap=await getDocs(query(collection(db,'users'), where('mentorUid','==',uid)));
-    if(snap.empty){ host.innerHTML='<p class="mentee-empty">No mentees have picked you yet. Share your username so they can choose you when they sign up.</p>'; return; }
+    if(snap.empty){ host.innerHTML='<p class="mentee-empty">No students have picked you yet. Share your username so they can choose you when they sign up.</p>'; return; }
     const cases=caseFlat();
     const cards=await Promise.all(snap.docs.map(async d=>{
       const mentee=d.data();
@@ -118,7 +123,7 @@ async function loadMentorDashboard(uid){
         '</article>';
     }));
     host.innerHTML=cards.join('');
-  }catch(e){ host.innerHTML='<p class="mentee-empty">Could not load mentees. '+esc(friendlyAuthError(e))+'</p>'; console.warn(e); }
+  }catch(e){ host.innerHTML='<p class="mentee-empty">Could not load students. '+esc(friendlyAuthError(e))+'</p>'; console.warn(e); }
 }
 
 /* ==================== admin panel ==================== */
@@ -132,27 +137,27 @@ async function loadAdminPanel(){
     all=snap.docs.map(d=>({uid:d.id, ...d.data()}));
   }catch(e){ tbody.innerHTML='<tr><td colspan="6">Could not load users. '+esc(friendlyAuthError(e))+'</td></tr>'; console.warn(e); return; }
 
-  // only approved mentors (or admins, who bypass approval) count as choosable mentors
-  const mentors=all.filter(u=>u.role==='mentor' && (u.mentorApproved || u.isAdmin));
+  // only approved mentors/teachers (or admins, who bypass approval) count as choosable
+  const mentors=all.filter(u=>isStaffRole(u.role) && (u.mentorApproved || u.isAdmin));
   function mentorOptsFor(currentUid){
     return '<option value=""'+(!currentUid?' selected':'')+'>— none —</option>'+
-      mentors.map(m=>'<option value="'+m.uid+'"'+(m.uid===currentUid?' selected':'')+'>'+esc(m.username)+'</option>').join('');
+      mentors.map(m=>'<option value="'+m.uid+'"'+(m.uid===currentUid?' selected':'')+'>'+esc(m.username)+' ('+esc(m.role)+')</option>').join('');
   }
 
   tbody.innerHTML = all.map(u=>{
     const isMentee=u.role==='mentee';
-    const isMentor=u.role==='mentor';
+    const isStaff=isStaffRole(u.role);
     const mentorCell = isMentee
       ? '<select data-mentor-uid="'+u.uid+'">'+mentorOptsFor(u.mentorUid)+'</select>'
       : '<span class="muted-cell">—</span>';
-    const approvedCell = isMentor
+    const approvedCell = isStaff
       ? '<label class="admin-flag"><input type="checkbox" data-approved-uid="'+u.uid+'"'+((u.mentorApproved||u.isAdmin)?' checked':'')+(u.isAdmin?' disabled title="Admins are always treated as approved"':'')+'> Approved</label>'
       : '<span class="muted-cell">—</span>';
-    const adminCell = isMentor
+    const adminCell = isStaff
       ? '<label class="admin-flag"><input type="checkbox" data-admin-uid="'+u.uid+'"'+(u.isAdmin?' checked':'')+'> Admin</label>'
       : '<span class="muted-cell">—</span>';
     return '<tr data-row-uid="'+u.uid+'"><td>'+esc(u.username)+(u.uid===currentUser.uid?' <span class="muted-cell">(you)</span>':'')+'</td>'+
-      '<td><select data-role-uid="'+u.uid+'"><option value="mentee"'+(isMentee?' selected':'')+'>Mentee</option><option value="mentor"'+(isMentor?' selected':'')+'>Mentor</option></select></td>'+
+      '<td><select data-role-uid="'+u.uid+'"><option value="mentee"'+(isMentee?' selected':'')+'>Student</option><option value="mentor"'+(u.role==='mentor'?' selected':'')+'>Mentor</option><option value="teacher"'+(u.role==='teacher'?' selected':'')+'>Teacher</option></select></td>'+
       '<td>'+approvedCell+'</td>'+
       '<td>'+mentorCell+'</td>'+
       '<td>'+adminCell+'</td>'+
@@ -164,7 +169,7 @@ async function loadAdminPanel(){
     msg.textContent='';
     try{
       const patch={role};
-      if(role==='mentor') patch.mentorUid=null; // a mentor doesn't have a mentor of their own
+      if(isStaffRole(role)) patch.mentorUid=null; // a mentor/teacher doesn't have a mentor of their own
       await setDoc(doc(db,'users',uid), patch, {merge:true});
       loadAdminPanel();
     }catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); }
@@ -219,31 +224,31 @@ document.getElementById('inviteForm').addEventListener('submit', async e=>{
   if(!value){ msg.style.color='var(--lava)'; msg.textContent='Enter a code — it can\'t be blank.'; return; }
   try{
     await setDoc(doc(db,'config','mentorInvite'), {code:value});
-    msg.style.color='var(--current)'; msg.textContent='Saved. Anyone signing up as a mentor now needs this exact code.';
+    msg.style.color='var(--current)'; msg.textContent='Saved. Anyone signing up as a mentor or teacher now needs this exact code.';
   }catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); }
 });
 
 /* ==================== auth state ==================== */
 if(fbReady){
   onAuthStateChanged(auth, async user=>{
-    if(!user){ currentUser=null; showGate('Log in first', "You need to be logged in as a mentor or admin to see this page."); return; }
+    if(!user){ currentUser=null; showGate('Log in first', "You need to be logged in as a mentor, teacher or admin to see this page."); return; }
     try{
       const uSnap=await getDoc(doc(db,'users',user.uid));
-      if(!uSnap.exists()){ currentUser=null; showGate('Log in first', "You need to be logged in as a mentor or admin to see this page."); return; }
+      if(!uSnap.exists()){ currentUser=null; showGate('Log in first', "You need to be logged in as a mentor, teacher or admin to see this page."); return; }
       const u=uSnap.data();
       currentUser={uid:user.uid, username:u.username, role:u.role, isAdmin:u.isAdmin===true, mentorApproved:u.mentorApproved===true};
-      const isApprovedMentor=currentUser.role==='mentor' && (currentUser.mentorApproved || currentUser.isAdmin);
+      const isApprovedMentor=isStaffRole(currentUser.role) && (currentUser.mentorApproved || currentUser.isAdmin);
 
       document.getElementById('acctUser').hidden=false;
       document.getElementById('acctName').textContent=currentUser.username;
-      document.getElementById('acctRole').textContent=currentUser.role+(currentUser.isAdmin?' · admin':'')+(currentUser.role==='mentor'&&!isApprovedMentor?' · pending':'');
+      document.getElementById('acctRole').textContent=roleLabel(currentUser.role)+(currentUser.isAdmin?' · admin':'')+(isStaffRole(currentUser.role)&&!isApprovedMentor?' · pending':'');
 
-      if(currentUser.role==='mentor' && !isApprovedMentor){
-        showGate('Waiting on admin approval', "Your mentor account isn't approved yet — an admin needs to confirm it in Manage everyone before you can see any mentees here. Check back once that's done.");
+      if(isStaffRole(currentUser.role) && !isApprovedMentor){
+        showGate('Waiting on admin approval', "Your account isn't approved yet — an admin needs to confirm it in Manage everyone before you can see any students here. Check back once that's done.");
         return;
       }
       if(!isApprovedMentor && !currentUser.isAdmin){
-        showGate('Nothing here for mentees', "This page is for mentors and admins. Head back to the site to keep working through the syllabus.");
+        showGate('Nothing here for students', "This page is for mentors, teachers and admins. Head back to the site to keep working through the syllabus.");
         return;
       }
       document.getElementById('gate').hidden=true;
