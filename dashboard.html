@@ -53,7 +53,7 @@
 
     <form class="auth-form" id="inviteForm" style="max-width:420px;margin-top:34px;">
       <h3 style="font-size:17px;">Mentor invite code</h3>
-      <p class="band-sub" style="margin:6px 0 0;">Required to sign up as a mentor or teacher. Change it any time to invalidate the old one — anyone who already has an account keeps their access either way.</p>
+      <p class="band-sub" style="margin:6px 0 0;">Required to sign up as a mentor or teacher. Changing it stops the old code working. People who already have accounts keep their access.</p>
       <label>Current code<input type="text" id="inviteCodeInput" placeholder="Loading&hellip;" autocomplete="off"></label>
       <p class="auth-error" id="inviteMsg"></p>
       <button type="submit" class="acct-btn acct-btn-solid">Save code</button>
@@ -99,12 +99,12 @@ document.getElementById('btnLogout').addEventListener('click',()=>{ if(fbReady) 
 const THEMES={1:'Population and settlement',2:'The natural environment',3:'Economic development'};
 const LEVEL_LABELS=['Not started','Learning','Confident'];
 let mentees=[]; // [{uid, username, levels, caseLevels, updatedAt, stats}]
+let menteesLoaded=false;
 let studentSort='least';
 
 // links into the main site, which opens and scrolls to that topic or case study
 const topicHref=code=>'index.html#t'+code.replace('.','-');
 const caseHref=id=>'index.html#case-'+id.replace(/[^a-zA-Z0-9]/g,'-');
-const levelPill=l=>'<span class="lvl-pill lvl-'+l+'">'+LEVEL_LABELS[l]+'</span>';
 
 function studentStats(levels, caseLevels){
   const cases=caseFlat();
@@ -113,7 +113,7 @@ function studentStats(levels, caseLevels){
   return {
     topicsConf:tl.filter(l=>l===2).length, topicsLearn:tl.filter(l=>l===1).length,
     casesConf:cl.filter(l=>l===2).length, casesTotal:cases.length,
-    // share of every topic and case study marked confident / learning — drives the bar and the sort
+    // share of every topic and case study marked confident / learning; drives the bar and the sort
     confPct:Math.round(100*all.filter(l=>l===2).length/all.length),
     learnPct:Math.round(100*all.filter(l=>l===1).length/all.length),
     score:all.reduce((a,l)=>a+l,0)/(2*all.length)
@@ -146,7 +146,7 @@ async function loadMentorDashboard(uid){
     host.innerHTML='<p class="mentee-empty">Could not load students. '+esc(friendlyAuthError(e))+'</p>'; console.warn(e);
     return;
   }
-  renderStudentList();
+  menteesLoaded=true;
   route();
 }
 
@@ -162,7 +162,7 @@ function sortedMentees(){
 
 // where a group session would help most: started topics with the lowest
 // average level across all students, plus the topics nobody has started yet
-// (listed separately — early in the year that's most of them, and they'd
+// (listed separately: early in the year that's most of them, and they'd
 // otherwise crowd out the topics students are actually struggling with)
 function weakestTopicsHtml(){
   const n=mentees.length;
@@ -202,27 +202,63 @@ function renderStudentList(){
   document.getElementById('studentSort').addEventListener('change',e=>{ studentSort=e.target.value; renderStudentList(); });
 }
 
+// Not started / Learning / Confident buttons for one topic or case study.
+// This is the only place a mentor changes a student's progress.
+function levelButtons(m, kind, key){
+  const l=(kind==='topic'?m.levels:m.caseLevels)[key]||0;
+  return '<span class="lvl-btns" role="group" aria-label="Status">'+LEVEL_LABELS.map((label,v)=>
+    '<button type="button" class="lvl-'+v+'" data-kind="'+kind+'" data-key="'+key+'" data-level="'+v+'" aria-pressed="'+(l===v)+'">'+label+'</button>'
+  ).join('')+'</span>';
+}
+
+function statsHtml(m){
+  const s=m.stats;
+  return '<span><b>'+s.topicsConf+'</b> of '+TOPICS.length+' topics confident'+(s.topicsLearn?', '+s.topicsLearn+' learning':'')+'</span>'+
+    '<span><b>'+s.casesConf+'</b> of '+s.casesTotal+' case studies confident</span><span>'+lastActive(m.updatedAt)+'</span>';
+}
+
 function renderStudentDetail(m){
-  const s=m.stats, cases=caseFlat();
-  const themes=[1,2,3].map(th=>'<h4 class="sd-theme">Theme '+th+' &middot; '+THEMES[th]+'</h4><ul class="sd-topics">'+
+  const cases=caseFlat();
+  const themes=[1,2,3].map(th=>'<h4 class="sd-theme">Theme '+th+': '+THEMES[th]+'</h4><ul class="sd-topics">'+
     TOPICS.filter(t=>t.theme===th).map(t=>{
       const myCases=cases.filter(c=>c.code===t.code);
-      return '<li><a class="sd-row" href="'+topicHref(t.code)+'"><span class="code">'+t.code+'</span><span class="sd-title">'+esc(t.title)+'</span>'+levelPill(m.levels[t.code]||0)+'</a>'+
+      return '<li><div class="sd-row"><a class="sd-link" href="'+topicHref(t.code)+'"><span class="code">'+t.code+'</span><span class="sd-title">'+esc(t.title)+'</span></a>'+
+          levelButtons(m,'topic',t.code)+'<span class="sd-msg" role="status"></span></div>'+
         (myCases.length ? '<ul class="sd-cases">'+myCases.map(c=>
-          '<li><a class="sd-row sd-case" href="'+caseHref(c.id)+'"><span class="sd-letter">'+c.code+c.letter+'</span>'+
-          '<span class="sd-title">'+esc(c.t)+(c.src?'<span class="sd-src">'+esc(c.src)+'</span>':'')+'</span>'+levelPill(m.caseLevels[c.id]||0)+'</a></li>'
+          '<li><div class="sd-row sd-case"><a class="sd-link" href="'+caseHref(c.id)+'"><span class="sd-letter">'+c.code+c.letter+'</span>'+
+          '<span class="sd-title">'+esc(c.t)+(c.src?'<span class="sd-src">'+esc(c.src)+'</span>':'')+'</span></a>'+
+          levelButtons(m,'case',c.id)+'<span class="sd-msg" role="status"></span></div></li>'
         ).join('')+'</ul>' : '')+'</li>';
     }).join('')+'</ul>').join('');
   const host=document.getElementById('studentDetailView');
   host.innerHTML='<a class="back-link" href="#">&larr; All students</a>'+
     '<div class="band-head"><span class="band-num">Student</span><h2>'+esc(m.username)+'</h2></div>'+
-    '<div class="mentee-stats sd-stats"><span><b>'+s.topicsConf+'</b> of '+TOPICS.length+' topics confident'+(s.topicsLearn?', '+s.topicsLearn+' learning':'')+'</span>'+
-    '<span><b>'+s.casesConf+'</b> of '+s.casesTotal+' case studies confident</span><span>'+lastActive(m.updatedAt)+'</span></div>'+
-    '<p class="band-sub">Click any topic or case study to open it on the main site, where you can also change their status.</p>'+
+    '<div class="mentee-stats sd-stats" id="sdStats">'+statsHtml(m)+'</div>'+
+    '<p class="band-sub">Change their status with the buttons, for example after you go through a topic together. Click a topic or case study to open its notes on the main site.</p>'+
     themes;
+  host.querySelectorAll('.lvl-btns button').forEach(b=>b.addEventListener('click',()=>
+    setStudentLevel(m, b.dataset.kind, b.dataset.key, +b.dataset.level, b.closest('.sd-row'))));
 }
 
-// #student/<uid> shows one student; anything else shows the list — so the
+async function setStudentLevel(m, kind, key, v, row){
+  const field=kind==='topic'?'levels':'caseLevels';
+  const prev=m[field][key]||0;
+  if(prev===v) return;
+  const msg=row.querySelector('.sd-msg');
+  const paint=l=>row.querySelectorAll('.lvl-btns button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.level===l)));
+  const refresh=()=>{ m.stats=studentStats(m.levels,m.caseLevels); document.getElementById('sdStats').innerHTML=statsHtml(m); };
+  m[field][key]=v; paint(v); refresh(); msg.textContent=''; msg.className='sd-msg';
+  // only the one field changes, so this can't overwrite anything else the student has marked
+  const patch=kind==='topic' ? {levels:{[key]:v}} : {caseLevels:{[key]:v}, cases:{[key]:v===2}};
+  try{
+    await setDoc(doc(db,'progress',m.uid), patch, {merge:true});
+  }catch(e){
+    m[field][key]=prev; paint(prev); refresh();
+    msg.className='sd-msg err'; msg.textContent='Not saved: '+friendlyAuthError(e);
+  }
+}
+
+// #student/<uid> shows one student and anything else shows the list, so the
 // browser's back button returns from a student to the list
 function route(){
   const m=location.hash.match(/^#student\/(.+)$/);
@@ -232,6 +268,7 @@ function route(){
   // one student at a time gets the whole page; the admin table returns with the list
   if(currentUser && currentUser.isAdmin) document.getElementById('adminSection').hidden=!!st;
   if(st){ renderStudentDetail(st); window.scrollTo(0,0); }
+  else if(menteesLoaded) renderStudentList(); // picks up any changes made on a student's page
 }
 window.addEventListener('hashchange',route);
 
@@ -249,7 +286,7 @@ async function loadAdminPanel(){
   // only approved mentors/teachers (or admins, who bypass approval) count as choosable
   const mentors=all.filter(u=>isStaffRole(u.role) && (u.mentorApproved || u.isAdmin));
   function mentorOptsFor(currentUid){
-    return '<option value=""'+(!currentUid?' selected':'')+'>— none —</option>'+
+    return '<option value=""'+(!currentUid?' selected':'')+'>None</option>'+
       mentors.map(m=>'<option value="'+m.uid+'"'+(m.uid===currentUid?' selected':'')+'>'+esc(m.username)+' ('+esc(m.role)+')</option>').join('');
   }
 
@@ -261,8 +298,8 @@ async function loadAdminPanel(){
   const banner=document.getElementById('pendingBanner');
   banner.hidden=!nPending;
   banner.textContent=nPending===1
-    ? '1 mentor or teacher is waiting for approval — they\'re at the top of the table. Tick Approved to unlock their tools.'
-    : nPending+' mentors or teachers are waiting for approval — they\'re at the top of the table. Tick Approved to unlock their tools.';
+    ? '1 mentor or teacher is waiting for approval. They\'re at the top of the table. Tick Approved to give them access.'
+    : nPending+' mentors or teachers are waiting for approval. They\'re at the top of the table. Tick Approved to give them access.';
 
   tbody.innerHTML = all.map(u=>{
     const isMentee=u.role==='mentee';
@@ -270,13 +307,13 @@ async function loadAdminPanel(){
     const note=rowNote && rowNote.uid===u.uid ? rowNote : null;
     const mentorCell = isMentee
       ? '<select data-mentor-uid="'+u.uid+'">'+mentorOptsFor(u.mentorUid)+'</select>'
-      : '<span class="muted-cell">—</span>';
+      : '<span class="muted-cell">n/a</span>';
     const approvedCell = isStaff
       ? '<label class="admin-flag"><input type="checkbox" data-approved-uid="'+u.uid+'"'+((u.mentorApproved||u.isAdmin)?' checked':'')+(u.isAdmin?' disabled title="Admins are always treated as approved"':'')+'> Approved</label>'
-      : '<span class="muted-cell">—</span>';
+      : '<span class="muted-cell">n/a</span>';
     const adminCell = isStaff
       ? '<label class="admin-flag"><input type="checkbox" data-admin-uid="'+u.uid+'"'+(u.isAdmin?' checked':'')+'> Admin</label>'
-      : '<span class="muted-cell">—</span>';
+      : '<span class="muted-cell">n/a</span>';
     return '<tr data-row-uid="'+u.uid+'"'+(isPending(u)?' class="pending-row"':'')+'><td>'+esc(u.username)+(u.uid===currentUser.uid?' <span class="muted-cell">(you)</span>':'')+
         (isPending(u)?'<span class="pending-tag">Waiting for approval</span>':'')+
         '<div class="row-msg'+(note?(note.ok?' ok':' err'):'')+'" data-msg-uid="'+u.uid+'" role="status">'+(note?esc(note.text):'')+'</div></td>'+
@@ -293,12 +330,12 @@ async function loadAdminPanel(){
     const wasStaff=isStaffRole(prev), nowStaff=isStaffRole(role);
     const linked=all.filter(x=>x.role==='mentee' && x.mentorUid===uid);
     msg.textContent='';
-    // spell out what the change does before it happens — one misclick here
+    // spell out what the change does before it happens: one misclick here
     // used to demote a mentor instantly and leave their students pointing at them
     const lines=['Change '+u.username+' from '+roleLabel(prev)+' to '+roleLabel(role)+'?'];
     if(wasStaff && !nowStaff){
       lines.push('They lose access to this dashboard and the mentor tools.');
-      if(linked.length) lines.push('Their '+linked.length+' student'+(linked.length===1?'':'s')+' ('+linked.map(x=>x.username).join(', ')+') will be set to "no mentor" — reassign them afterwards if needed.');
+      if(linked.length) lines.push('Their '+linked.length+' student'+(linked.length===1?'':'s')+' ('+linked.map(x=>x.username).join(', ')+') will be set to "no mentor". You can reassign them afterwards if needed.');
       if(uid===currentUser.uid) lines.push('This is your own account.');
     }
     if(!wasStaff && nowStaff){
@@ -330,7 +367,7 @@ async function loadAdminPanel(){
     msg.textContent='';
     try{
       await setDoc(doc(db,'users',uid), {mentorApproved: cb.checked}, {merge:true});
-      setRowNote(uid, cb.checked ? 'Approved — mentor tools unlocked.' : 'Approval removed.', true);
+      setRowNote(uid, cb.checked ? 'Approved. They can now use the mentor tools.' : 'Approval removed.', true);
       loadAdminPanel();
     }catch(e){ cb.checked=!cb.checked; setRowNote(uid,'Not saved: '+friendlyAuthError(e),false); }
   }));
@@ -344,7 +381,7 @@ async function loadAdminPanel(){
   }));
   tbody.querySelectorAll('[data-remove-uid]').forEach(btn=>btn.addEventListener('click', async ()=>{
     const uid=btn.dataset.removeUid, name=btn.dataset.removeName;
-    if(!confirm('Remove '+name+'\'s account? This deletes their profile and progress, and can\'t be undone. (Their login itself stays until removed from the Firebase console — see FIREBASE_SETUP.md.)')) return;
+    if(!confirm('Remove '+name+'\'s account? This deletes their profile and progress, and can\'t be undone. (Their login stays until you also delete it in the Firebase console. See FIREBASE_SETUP.md.)')) return;
     msg.textContent='';
     try{
       await deleteDoc(doc(db,'users',uid));
@@ -374,7 +411,7 @@ async function loadInviteCode(){
   try{
     const snap=await getDoc(doc(db,'config','mentorInvite'));
     input.value = snap.exists() ? (snap.data().code||'') : '';
-    input.placeholder = snap.exists() ? '' : 'Not set yet — pick a code below';
+    input.placeholder = snap.exists() ? '' : 'Not set yet. Pick a code below.';
   }catch(e){ msg.style.color='var(--lava)'; msg.textContent='Could not load the current code: '+friendlyAuthError(e); }
 }
 document.getElementById('inviteForm').addEventListener('submit', async e=>{
@@ -382,7 +419,7 @@ document.getElementById('inviteForm').addEventListener('submit', async e=>{
   const msg=document.getElementById('inviteMsg');
   const value=document.getElementById('inviteCodeInput').value.trim();
   msg.style.color=''; msg.textContent='';
-  if(!value){ msg.style.color='var(--lava)'; msg.textContent='Enter a code — it can\'t be blank.'; return; }
+  if(!value){ msg.style.color='var(--lava)'; msg.textContent='Enter a code. It can\'t be blank.'; return; }
   try{
     await setDoc(doc(db,'config','mentorInvite'), {code:value});
     msg.style.color='var(--current)'; msg.textContent='Saved. Anyone signing up as a mentor or teacher now needs this exact code.';
@@ -405,7 +442,7 @@ if(fbReady){
       document.getElementById('acctRole').textContent=roleLabel(currentUser.role)+(currentUser.isAdmin?' · admin':'')+(isStaffRole(currentUser.role)&&!isApprovedMentor?' · pending':'');
 
       if(isStaffRole(currentUser.role) && !isApprovedMentor){
-        showGate('Waiting on admin approval', "Your account isn't approved yet — an admin needs to confirm it in Manage everyone before you can see any students here. Check back once that's done.");
+        showGate('Waiting on admin approval', "An admin needs to approve your account before you can see any students here.");
         return;
       }
       if(!isApprovedMentor && !currentUser.isAdmin){

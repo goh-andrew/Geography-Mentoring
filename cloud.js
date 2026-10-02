@@ -1,5 +1,5 @@
 /* =====================================================================
-   Cloud accounts (Firebase) — shared setup for index.html and
+   Cloud accounts (Firebase): shared setup for index.html and
    dashboard.html. Mentor/teacher/student login and progress sync run on
    this. ("mentee" is still the stored role value for a student.)
 
@@ -7,7 +7,7 @@
    turn on Email/Password sign-in, create a Firestore database, paste
    your config below, and apply the security rules from
    FIREBASE_SETUP.md. Until firebaseConfig is filled in, the site still
-   works exactly as before (local-only, no login) — auth calls just
+   works exactly as before (local-only, no login) and auth calls just
    fail with a clear error in the login/signup form.
    ===================================================================== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -40,12 +40,12 @@ export function cleanUsername(u){ return u.trim().toLowerCase().replace(/[^a-z0-
 
 export function friendlyAuthError(e){
   const c = e && e.code || '';
-  if(!fbReady) return 'Accounts are not set up on this site yet — see FIREBASE_SETUP.md.';
+  if(!fbReady) return 'Accounts are not set up on this site yet. See FIREBASE_SETUP.md.';
   if(c==='auth/email-already-in-use') return 'That username is already taken.';
   if(c==='auth/invalid-credential'||c==='auth/wrong-password'||c==='auth/user-not-found') return 'Wrong username or password.';
   if(c==='auth/weak-password') return 'Password needs to be at least 6 characters.';
   if(c==='auth/invalid-email') return 'Enter a username using letters, numbers, dots, - or _.';
-  if(c==='auth/network-request-failed') return 'Network error — check your connection.';
+  if(c==='auth/network-request-failed') return 'Network error. Check your connection.';
   return e && e.message ? e.message : 'Something went wrong. Try again.';
 }
 

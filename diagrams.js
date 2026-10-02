@@ -6,7 +6,7 @@
 
    Scope: this file holds diagrams that plot data on axes (line/bar graphs)
    or draw a clean, self-contained geometric model (concentric rings, sector
-   wedges, input→output system boxes) — the kind of shape that stays legible
+   wedges, input→output system boxes): the kind of shape that stays legible
    from hand-picked coordinates. Illustrated scenes (landform cross-sections,
    formation sequences) were dropped after repeated label/leader-line
    collisions and stay off the site until there's a trustworthy way to build
@@ -20,7 +20,7 @@ const ROCK_HARD = "#9C9184", VEG = "#6B9E78";
 export const DIAGRAMS = {
 
   dtm: {
-    caption: "The demographic transition model — five stages, birth rate and death rate curves",
+    caption: "The demographic transition model: five stages, with birth rate and death rate curves",
     svg: `<svg viewBox="0 0 640 330" role="img" aria-label="Demographic transition model showing birth rate and death rate across five stages">
 <line x1="60" y1="40" x2="60" y2="260" stroke="${INK}" stroke-width="1.5"/>
 <line x1="60" y1="260" x2="620" y2="260" stroke="${INK}" stroke-width="1.5"/>
@@ -72,9 +72,9 @@ ${[
     svg: `<svg viewBox="0 0 560 300" role="img" aria-label="Burgess concentric zone model, five rings around the CBD">
 ${[
   {r:130, fill:"#EAEFEB", label:"5 · commuter / rural-urban fringe"},
-  {r:104, fill:"#D8E6DE", label:"4 · outer suburbs — high-class housing"},
-  {r:76,  fill:"#BEDCCC", label:"3 · inner suburbs — low-class housing"},
-  {r:48,  fill:REEF,      label:"2 · inner city — transition / twilight zone"},
+  {r:104, fill:"#D8E6DE", label:"4 · outer suburbs: high-class housing"},
+  {r:76,  fill:"#BEDCCC", label:"3 · inner suburbs: low-class housing"},
+  {r:48,  fill:REEF,      label:"2 · inner city: transition / twilight zone"},
   {r:22,  fill:SHELF,     label:"1 · CBD"}
 ].map(z=>`<circle cx="150" cy="150" r="${z.r}" fill="${z.fill}" stroke="#FFFFFF" stroke-width="2"/>`).join('')}
 <text x="150" y="154" text-anchor="middle" style="${F}font-size:10px;font-weight:600;fill:#fff">CBD</text>
@@ -92,7 +92,7 @@ ${[
   },
 
   "hoyt-model": {
-    caption: "The Hoyt sector model — Burgess's rings redrawn as wedges along transport routes",
+    caption: "The Hoyt sector model: Burgess's rings redrawn as wedges along transport routes",
     svg: `<svg viewBox="0 0 560 300" role="img" aria-label="Hoyt sector model, wedge-shaped sectors radiating from the CBD">
 <g transform="translate(170,150)">
 <path d="M0,0 L145,0 A145,145 0 0,1 93.2,111.1 Z" fill="${SEDIMENT}"/>
@@ -103,7 +103,7 @@ ${[
 <text x="0" y="4" text-anchor="middle" style="${F}font-size:10px;font-weight:600;fill:#fff">CBD</text>
 </g>
 ${[
-  ["CBD", SHELF, "centre — shops &amp; offices"],
+  ["CBD", SHELF, "centre: shops &amp; offices"],
   ["Industry", SEDIMENT, "along a road, rail line or river"],
   ["Low-class housing", "#CFA98F", "next to the industry sector"],
   ["Middle-class housing", "#D8E6DE", "largest sector, fills the gaps"],
@@ -117,7 +117,7 @@ ${[
   },
 
   "farming-system": {
-    caption: "A farm as a system — inputs, processes and outputs",
+    caption: "A farm as a system: inputs, processes and outputs",
     svg: `<svg viewBox="0 0 560 260" role="img" aria-label="A farm shown as a system with inputs on the left, farm processes in the middle, and outputs on the right">
 <rect x="205" y="40" width="150" height="180" fill="#EAEFEB" stroke="${INK}" stroke-width="2"/>
 ${[0,1,2,3].map(i=>`<rect x="${215+i*33}" y="90" width="28" height="45" fill="${i%2===0?'#C8D9AE':'#DCCB8E'}"/>`).join('')}
@@ -145,7 +145,7 @@ ${["Crops / milk / meat","Profit","Waste"].map((t,i)=>{
   },
 
   "industrial-system": {
-    caption: "A factory as a system — inputs, processes and outputs",
+    caption: "A factory as a system: inputs, processes and outputs",
     svg: `<svg viewBox="0 0 560 260" role="img" aria-label="A factory shown as a system with inputs on the left, manufacturing processes in the middle, and outputs on the right">
 <rect x="205" y="60" width="150" height="150" fill="#EAEFEB" stroke="${INK}" stroke-width="2"/>
 <rect x="220" y="80" width="40" height="40" fill="${SHELF}"/>
@@ -168,7 +168,7 @@ ${["Products","Profit","Waste &amp; pollution"].map((t,i)=>{
 }).join('')}
 <text x="205" y="45" style="${F}font-size:9.5px;font-weight:600;letter-spacing:.08em;fill:${MUTED}">INPUTS</text>
 <text x="446" y="45" style="${F}font-size:9.5px;font-weight:600;letter-spacing:.08em;fill:${MUTED}">OUTPUTS</text>
-<text x="205" y="225" style="${F}font-size:9px;fill:${MUTED}">feedback — profit is reinvested as a new input</text>
+<text x="205" y="225" style="${F}font-size:9px;fill:${MUTED}">feedback: profit is reinvested as a new input</text>
 <defs><marker id="isArr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="${INK}"/></marker></defs>
 </svg>`
   }

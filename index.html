@@ -8,12 +8,12 @@
 <link rel="canonical" href="https://goh-andrew.github.io/Geography-Mentoring/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="IGCSE Geography 0460 Mentoring">
-<meta property="og:description" content="Free self-study companion for Cambridge IGCSE Geography 0460 — syllabus notes, case studies and exam skills, with progress tracking.">
+<meta property="og:description" content="Free revision site for Cambridge IGCSE Geography 0460: syllabus notes, case studies and exam skills, with progress tracking.">
 <meta property="og:url" content="https://goh-andrew.github.io/Geography-Mentoring/">
 <meta property="og:image" content="https://goh-andrew.github.io/Geography-Mentoring/logo.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="IGCSE Geography 0460 Mentoring">
-<meta name="twitter:description" content="Free self-study companion for Cambridge IGCSE Geography 0460 — syllabus notes, case studies and exam skills, with progress tracking.">
+<meta name="twitter:description" content="Free revision site for Cambridge IGCSE Geography 0460: syllabus notes, case studies and exam skills, with progress tracking.">
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,6 +24,7 @@
 
 <header class="hero">
   <div class="acct-bar" id="acctBar">
+    <button type="button" class="acct-btn" id="btnSearch" aria-keyshortcuts="/">Search <kbd>/</kbd></button>
     <div class="acct-guest" id="acctGuest">
       <button type="button" class="acct-btn" id="btnLogin">Log in</button>
       <button type="button" class="acct-btn acct-btn-solid" id="btnSignup">Sign up</button>
@@ -43,15 +44,15 @@
       <button type="button" id="trackMenteeBtn" data-set-track="mentee" aria-pressed="true">I'm a student</button>
       <button type="button" id="trackMentorBtn" data-set-track="mentor" aria-pressed="false">I'm a mentor</button>
     </div>
-    <p class="switch-note"></p>
+    <p class="hero-note" id="heroMentorNote" hidden>Your students' progress is on the <a href="dashboard.html">dashboard</a>.</p>
 
     <section class="transect" aria-labelledby="transect-h">
       <div class="transect-head">
-        <p id="transect-h">Your progress through the syllabus</p>
-        <p id="transect-count">0 of 19 topics at confident</p>
+        <p id="transect-h">Your progress</p>
+        <p id="transect-count">0 of 19 topics confident</p>
       </div>
       <div class="transect-scroll">
-        <svg id="profile" viewBox="0 0 960 210" role="img" aria-label="A topographic cross-section where each syllabus topic is a station; the profile rises as you mark topics confident."></svg>
+        <svg id="profile" viewBox="0 0 960 210" role="img" aria-label="Chart of your progress on each of the 19 syllabus topics. Click a topic code to open it."></svg>
       </div>
       <div class="legend">
         <span class="key-group" id="topicKeyGroup">
@@ -59,9 +60,8 @@
           <span><i class="key" style="background:#48B7A6"></i> learning</span>
           <span><i class="key" style="background:#1B7F8E"></i> not started</span>
         </span>
-        <span>Click any station to jump to that topic.</span>
+        <span>Click a topic code to open it.</span>
       </div>
-      <div class="mentee-legend" id="menteeLegend" hidden></div>
     </section>
   </div>
 </header>
@@ -95,26 +95,24 @@
 
     <div>
       <section class="band" id="start">
-        <div class="band-head"><span class="band-num">00</span><h2>How to use this</h2></div>
+        <div class="band-head"><h2>How to use this</h2></div>
         <div class="paths">
           <article class="path" data-for="mentee">
-            <p class="role">Student</p>
-            <h3>Work one topic at a time</h3>
+            <h3>For students: one topic at a time</h3>
             <ol>
-              <li>Open a topic and read <strong>what the syllabus asks</strong> first</li>
-              <li>Read the notes underneath, then close them and say the topic aloud or write it down on a piece of paper from memory.</li>
-              <li>Name your case study for that topic. If you can't give a place, a figure and a date, you don't have one yet.</li>
-              <li>Answer the self-check questions to the mark allocation, then mark <em>learning</em> or <em>confident</em>. Watch your cross-section rise.</li>
+              <li>Open a topic and read <strong>what the syllabus asks</strong> first.</li>
+              <li>Read the notes, then close them and say the topic out loud or write it down from memory.</li>
+              <li>Name your case study for the topic, with a place, a figure and a date.</li>
+              <li>Answer the self-check questions, aiming for the marks shown, then mark the topic <em>learning</em> or <em>confident</em>.</li>
             </ol>
           </article>
           <article class="path" data-for="mentor">
-            <p class="role">Mentor</p>
-            <h3>Run a 40-minute session</h3>
+            <h3>For mentors: a 40-minute session</h3>
             <ol>
-              <li><strong>5 min</strong> — open with the recall prompt. Let them talk before you correct anything.</li>
-              <li><strong>10 min</strong> — work the "check they can" list. Anything they stumble on becomes the session.</li>
-              <li><strong>15 min</strong> — one exam question, timed, to the mark allocation.</li>
-              <li><strong>10 min</strong> — mark it together, then agree on the status. Be honest!</li>
+              <li><strong>5 min:</strong> start with the "Open with" question. Let them talk before you correct anything.</li>
+              <li><strong>10 min:</strong> go through the "Check they can" list. Spend longer on anything they get stuck on.</li>
+              <li><strong>15 min:</strong> one timed exam question.</li>
+              <li><strong>10 min:</strong> mark it together, then agree on their status. Be honest!</li>
             </ol>
           </article>
         </div>
@@ -140,14 +138,14 @@
 
       <section class="band" id="cases">
         <div class="band-head"><h2>Case Studies</h2></div>
-        <p class="band-sub" id="casesBandSub">Every required case study. Mark your confidence on each once you can produce the place, figures and dates from memory.</p>
+        <p class="band-sub" id="casesBandSub">Every required case study. Mark one confident once you can give the place, figures and dates from memory.</p>
         <div class="transect">
           <div class="transect-head">
-            <p id="case-transect-h">Cross-section — your case study confidence</p>
-            <p id="case-transect-count">0 of 0 case studies at confident</p>
+            <p id="case-transect-h">Your case study progress</p>
+            <p id="case-transect-count">0 of 27 case studies confident</p>
           </div>
           <div class="transect-scroll">
-            <svg id="case-profile" viewBox="0 0 960 210" role="img" aria-label="A cross-section where each required case study is a station; the profile rises as you mark case studies confident."></svg>
+            <svg id="case-profile" viewBox="0 0 960 210" role="img" aria-label="Chart of your progress on each required case study. Click a point to go to that case study in the list below."></svg>
           </div>
           <div class="legend">
             <span class="key-group" id="caseKeyGroup">
@@ -155,32 +153,31 @@
               <span><i class="key" style="background:#48B7A6"></i> learning</span>
               <span><i class="key" style="background:#1B7F8E"></i> not started</span>
             </span>
-            <span>Click any station to jump to that case study, or a case study's name to read its notes.</span>
+            <span>Click a point to find that case study below. Click a case study's name to read its notes.</span>
           </div>
-          <div class="mentee-legend" id="caseMenteeLegend" hidden></div>
         </div>
         <div class="case-list" id="case-list"></div>
       </section>
 
       <section class="band" id="papers">
-        <div class="band-head"><span class="band-num">Assessment</span><h2>Your papers</h2></div>
+        <div class="band-head"><h2>Your papers</h2></div>
         <p class="band-sub">You sit Paper 1, Paper 2 and Paper 4 (Alternative to Coursework). Grades A* to G.</p>
         <div class="papers">
           <article class="paper">
             <span class="pct">45%</span>
-            <h4>Paper 1 — Geographical Themes</h4>
-            <p>75 marks weighted to 100. Answer <strong>three</strong> questions, one from each theme, 25 marks each.</p>
+            <h4>Paper 1: Geographical Themes</h4>
+            <p>75 marks weighted to 100. Answer <strong>three</strong> questions, one from each theme, 25 marks each. Each question ends with a 7-mark question on a named example, marked in levels: for 6 or 7 marks you need developed points with details from the place.</p>
             <span class="time">1 h 45 min &middot; externally assessed</span>
           </article>
           <article class="paper">
             <span class="pct">27.5%</span>
-            <h4>Paper 2 — Geographical Skills</h4>
-            <p>60 marks, all questions compulsory. One third of the marks are the 1:25 000 or 1:50 000 map question. No place knowledge needed.</p>
+            <h4>Paper 2: Geographical Skills</h4>
+            <p>60 marks, all questions compulsory. A third of the marks come from the 1:25 000 or 1:50 000 map question. You don't need to know any case studies.</p>
             <span class="time">1 h 30 min &middot; pencil, ruler, protractor, calculator</span>
           </article>
           <article class="paper">
             <span class="pct">27.5%</span>
-            <h4>Paper 4 — Alternative to Coursework</h4>
+            <h4>Paper 4: Alternative to Coursework</h4>
             <p>60 marks, all compulsory. Written fieldwork tasks: planning an investigation, collecting and presenting data, testing a hypothesis, and drawing conclusions.</p>
             <span class="time">1 h 30 min &middot; externally assessed</span>
           </article>
@@ -194,12 +191,12 @@
           <div class="blk">
             <h5>On the map extract</h5>
             <ul>
-              <li>Four- and six-figure grid references — first tenth is 0, last is 9.</li>
+              <li>Four- and six-figure grid references. The first tenth is 0 and the last is 9.</li>
               <li>Direction as a 16-point compass bearing <em>and</em> as a bearing from grid north (bring a protractor).</li>
               <li>Distance with a straight paper edge against the scale line; break curves into straight sections.</li>
               <li>Height difference by contour reading; interpret or complete a cross-section.</li>
               <li>Describe relief and drainage: ridge, scarp, plateau, flood plain; broad, steep-sided, gently sloping.</li>
-              <li>Settlement pattern — dispersed, nucleated, linear — plus site, growth and function.</li>
+              <li>Settlement pattern (dispersed, nucleated, linear), plus site, growth and function.</li>
               <li>Communications: type and density in relation to relief.</li>
             </ul>
           </div>
@@ -209,7 +206,7 @@
               <li>Population pyramids: compare male/female, working and dependent groups.</li>
               <li>Line, bar, divided bar, histogram, pictogram, pie.</li>
               <li>Scatter graphs with best-fit lines; positive and negative relationships.</li>
-              <li>Triangular graphs — employment structure.</li>
+              <li>Triangular graphs for employment structure.</li>
               <li>Wind-rose, radial, kite, dispersion graphs.</li>
               <li>Isoline maps and choropleth maps.</li>
               <li>Plot onto given axes accurately, and suggest a suitable graph for a data set.</li>
@@ -219,14 +216,14 @@
       </section>
 
       <section class="band" id="fieldwork">
-        <div class="band-head"><span class="band-num">Enquiry</span><h2>Fieldwork and Paper 4</h2></div>
+        <div class="band-head"><span class="band-num">Paper 4</span><h2>Fieldwork</h2></div>
         <p class="band-sub">Remember what you learned in Vietnam!</p>
         <div id="p4-notes" style="margin-top:24px;"></div>
       </section>
 
       <section class="band" id="commands">
-        <div class="band-head"><span class="band-num">Marking</span><h2>Command words</h2></div>
-        <p class="band-sub">Lots of marks lost are a right answer to the wrong command word.</p>
+        <div class="band-head"><h2>Command words</h2></div>
+        <p class="band-sub">Check the command word before you write. It tells you what kind of answer the examiner is looking for.</p>
         <div class="datawrap"><table class="data" id="cmd-table">
           <thead><tr><th style="width:130px">Command</th><th>What the examiner wants</th></tr></thead>
           <tbody></tbody>
@@ -238,12 +235,24 @@
 
 <footer>
   <div class="wrap">
-    <p><strong>Built against</strong> the Cambridge IGCSE Geography 0460 syllabus for 2025 and 2026 (version 2).</p>
+    <p>Based on the Cambridge IGCSE Geography 0460 syllabus for 2025 and 2026 (version 2).</p>
     <p>Progress is saved on this device, and to your account if you're logged in.<button type="button" id="reset" style="font-family:var(--mono);font-size:11px;background:none;border:1px solid rgba(255,255,255,.25);color:#8FA6A4;padding:6px 10px;cursor:pointer;">Reset progress</button></p>
   </div>
 </footer>
 
 <div class="save-status" id="saveStatus" role="status" aria-live="polite" hidden></div>
+
+<div class="modal-backdrop search-backdrop" id="searchBackdrop" hidden>
+  <div class="modal search-modal" role="dialog" aria-modal="true" aria-label="Search the site">
+    <div class="search-bar">
+      <input type="search" id="searchInput" placeholder="Search topics, notes, case studies&hellip;" autocomplete="off" spellcheck="false"
+        role="combobox" aria-expanded="true" aria-controls="searchResults" aria-autocomplete="list">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="search-results" id="searchResults" role="listbox" aria-label="Results"></div>
+    <p class="search-help">&uarr; &darr; to move, Enter to open. Press / to search from anywhere on the page.</p>
+  </div>
+</div>
 
 <div class="modal-backdrop" id="authBackdrop" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
@@ -259,7 +268,7 @@
       <label>Password<input type="password" id="loginPassword" autocomplete="current-password" required></label>
       <p class="auth-error" id="loginError"></p>
       <button type="submit" class="acct-btn acct-btn-solid">Log in</button>
-      <p class="auth-note">Forgotten your password? There's no reset email, as accounts don't use real email addresses. Ask an admin to clear your old login so you can sign up again with the same username — your old progress won't carry over.</p>
+      <p class="auth-note">Forgotten your password? There's no reset email, as accounts don't use real email addresses. Ask an admin to clear your old login so you can sign up again with the same username. Your old progress won't carry over.</p>
     </form>
 
     <form id="signupForm" class="auth-form" hidden>
@@ -278,7 +287,7 @@
       <label id="suInviteWrap" hidden>Mentor invite code
         <input type="text" id="suInviteCode" autocomplete="off">
       </label>
-      <p class="auth-note" id="suInviteNote" hidden>Ask Andrew or Rohan for the code. A mentor or teacher account needs a quick admin approval before those tools unlock.</p>
+      <p class="auth-note" id="suInviteNote" hidden>Ask Andrew or Rohan for the code. An admin also has to approve mentor and teacher accounts before the mentor tools work.</p>
       <p class="auth-note">Passwords need at least 6 characters. Usernames are not case sensitive.</p>
       <p class="auth-error" id="signupError"></p>
       <button type="submit" class="acct-btn acct-btn-solid">Create account</button>
@@ -291,7 +300,7 @@
     <button type="button" class="modal-close" id="acctClose" aria-label="Close">&times;</button>
     <h3 id="acctPanelTitle">Your account</h3>
     <p class="auth-note" style="margin-top:0;"><b id="acctPanelName" style="color:var(--ink);font-family:var(--body)"></b> &middot; <span id="acctPanelRole"></span></p>
-    <p class="auth-note" id="acctPendingNote" hidden>Your account is awaiting admin approval — you'll see the regular student view until then.</p>
+    <p class="auth-note" id="acctPendingNote" hidden>Your account is waiting for an admin to approve it. Until then you'll see the student view.</p>
     <div id="acctMenteeSettings" class="auth-form" hidden>
       <label>Your mentor or teacher
         <select id="acctMentorSelect"></select>
@@ -334,16 +343,14 @@ import { DIAGRAMS } from "./diagrams.js";
 import { auth, db, fbReady, usernameToEmail, cleanUsername, friendlyAuthError } from "./cloud.js";
 
 let currentUser=null; // {uid, username, role, mentorUid, isAdmin}
-// ?login=dashboard — sent here by the dashboard's "Log in" button: show the
+// ?login=dashboard: sent here by the dashboard's "Log in" button: show the
 // login form, then go back once logged in. Dropped from the URL so a refresh
 // doesn't reopen it.
 const loginReturn=new URLSearchParams(location.search).get('login');
 if(loginReturn) history.replaceState(null,'',location.pathname+location.hash);
-let mentorMentees=[]; // for mentor accounts: [{uid, username, levels, caseLevels}]
-const MENTEE_COLORS=['#48B7A6','#C98A2E','#7C9CFF','#E0607E','#8BD17C','#F2B84B','#5EC8E8','#D98CD9'];
 
 // a mentor- or teacher-role account only gets mentor features once an admin
-// approves it (or is themselves an admin) — a pending signup is treated as a
+// approves it (or is themselves an admin). A pending signup is treated as a
 // student. "teacher" is functionally identical to "mentor", just labelled
 // differently, so both roles flow through this same gate.
 function isFunctionalMentor(u){
@@ -354,7 +361,7 @@ function roleLabel(role){ return role==='mentee' ? 'student' : role; }
 
 const CMDS = [
 ["Calculate","Work it out from the facts, figures or information given."],
-["Compare","Identify similarities and/or differences — both sides, in the same sentence where you can."],
+["Compare","Identify similarities and/or differences. Mention both places or things, in the same sentence if you can."],
 ["Define","Give the precise meaning."],
 ["Describe","State the points; give the characteristics and main features. No reasons needed."],
 ["Devise","Create a questionnaire to present information to specific requirements."],
@@ -394,7 +401,7 @@ async function saveLocal(){
   try{ if(window.storage&&window.storage.set){await window.storage.set(KEY,v); savedLocally=true;} }catch(e){}
   if(!savedLocally){ try{ localStorage.setItem(KEY,v); }catch(e){} }
 }
-// save(...[field,key]) — saves locally, then sends just those fields to the
+// save(...[field,key]) saves locally, then sends just those fields to the
 // cloud. Writing only what changed (merge) means a student's open page can't
 // overwrite marks their mentor made since the page loaded.
 function save(...entries){
@@ -404,7 +411,7 @@ function save(...entries){
 }
 
 /* ---------------- cloud sync ---------------- */
-// only students have their own progress; mentors read (and edit via setMentee*), they don't write here
+// only students save their own progress here; mentors edit students' progress from the dashboard
 const canCloudSave=()=>fbReady && currentUser && currentUser.role==='mentee';
 const dirty=new Map(); // [field,key] pairs not yet confirmed saved to the cloud
 let inFlight=0, saveErr=null;
@@ -426,7 +433,7 @@ function resetCloudSync(){ dirty.clear(); saveErr=null; showSaveNotice(null); }
 const hasUnsaved=()=>canCloudSave() && (dirty.size>0 || inFlight>0);
 window.addEventListener('beforeunload',e=>{ if(hasUnsaved()){ e.preventDefault(); e.returnValue=''; } });
 
-// "Saving…" only appears if a write is slow (e.g. offline — Firestore queues it
+// "Saving…" only appears if a write is slow (e.g. offline, when Firestore queues it
 // and finishes once the connection returns); a failure stays up with a Retry.
 let saveNoticeUp=false, saveTimer=null;
 function showSaveNotice(kind,html){
@@ -484,7 +491,7 @@ function renderNodes(nodes){
       const dg=DIAGRAMS[n.id];
       if(!dg) return '';
       // a note can be on the page twice (topic notes + case-study notes), so give
-      // each copy its own SVG ids — otherwise url(#…) can resolve to a hidden copy
+      // each copy its own SVG ids, otherwise url(#…) can resolve to a hidden copy
       const copy=++diagramCopy;
       const svgCopy=dg.svg.replace(/(id="|url\(#)([\w-]+)/g,(m,p,id)=>p+id+'-'+copy);
       return '<figure class="diagram">'+svgCopy+'<figcaption>'+esc(dg.caption)+'</figcaption></figure>';
@@ -497,14 +504,9 @@ let diagramCopy=0;
 const LEVELS=[['0','Not started'],['1','Learning'],['2','Confident']];
 
 /* ---------------- progress tags (topic headers + side nav) ---------------- */
-// what the closed topic card shows: the student's own level, or for a mentor
-// how many of their students are confident on it
+// the student's level on a closed topic card (mentors don't get one)
 function topicTag(code){
-  if(isFunctionalMentor(currentUser)){
-    if(!mentorMentees.length) return {txt:'',cls:''};
-    const n=mentorMentees.filter(m=>(m.levels[code]||0)===2).length;
-    return {txt:n+'/'+mentorMentees.length+' confident', cls:'lvl-m'};
-  }
+  if(isFunctionalMentor(currentUser)) return {txt:'',cls:''};
   const l=state.levels[code]||0;
   return l ? {txt:LEVELS[l][1], cls:'lvl-'+l} : {txt:'',cls:''};
 }
@@ -624,32 +626,24 @@ function topicCard(t){
   body.appendChild(panel);
 
   // status sits right after the self-check, before the (long) notes, so it's
-  // never buried under them
-  const st=el('div','status');
-  if(isMentor){
-    st.innerHTML='<span class="lab">Students</span>';
-    if(mentorMentees.length){
-      st.appendChild(buildMentorStatusList('topic',t.code,m=>m.levels[t.code]||0,(menteeUid,v)=>setMenteeTopicLevel(menteeUid,t.code,v)));
-    }else{
-      st.appendChild(el('span','mentee-empty-note','No students yet.'));
-    }
-  }else{
-    st.innerHTML='<span class="lab">Status</span>';
+  // never buried under them. Mentors set their students' status on the dashboard.
+  if(!isMentor){
+    const st=el('div','status','<span class="lab">Status</span>');
     LEVELS.forEach(([v,label])=>{
       const b=el('button',null,label); b.type='button'; b.dataset.level=v; b.dataset.code=t.code;
       b.setAttribute('aria-pressed',String((state.levels[t.code]||0)===+v));
       b.addEventListener('click',()=>setLevel(t.code,+v));
       st.appendChild(b);
     });
+    body.appendChild(st);
   }
-  body.appendChild(st);
 
   if(notes.length){
     const btn=el('button','notes-toggle',null);
     btn.type='button';
     btn.textContent='Open revision notes';
     const box=el('div','notes');
-    box.innerHTML=notes.map(n=>'<section class="note-sec"><h4>'+esc(n.title)+'</h4>'+
+    box.innerHTML=notes.map(n=>'<section class="note-sec" data-note-id="'+n.id+'"><h4>'+esc(n.title)+'</h4>'+
       (n.case?'<p class="src"><span class="flag">Case study</span></p>':'')+
       renderNodes(n.nodes)+'</section>').join('');
     // a second close button at the bottom, so finishing the notes doesn't mean
@@ -676,15 +670,15 @@ function topicCard(t){
 function trackPanel(t){
   const track=document.body.dataset.track;
   if(track==='mentee'){
-    return '<span class="role-note">Student</span><h5>How to revise this</h5><ul>'+
+    return '<h5>How to revise this</h5><ul>'+
       t.mentee.do.map(d=>'<li>'+d+'</li>').join('')+'</ul>'+
-      '<h5>Self-check — answer to the marks</h5><ul class="qs">'+
+      '<h5>Self-check questions</h5><ul class="qs">'+
       t.mentee.q.map(q=>'<li><div class="q-line"><span>'+esc(q[0])+'</span><span class="marks">['+q[1]+']</span></div>'+
-        (q[2]&&q[2].length ? '<details class="ans"><summary>Answered it? See what a good answer includes</summary><ul>'+
+        (q[2]&&q[2].length ? '<details class="ans"><summary>What a good answer includes</summary><ul>'+
           q[2].map(p=>'<li>'+esc(p)+'</li>').join('')+'</ul></details>' : '')+
         '</li>').join('')+'</ul>';
   }
-  return '<span class="role-note">Mentor</span><h5>Open with</h5><p style="margin:0 0 14px">'+t.mentor.open+'</p>'+
+  return '<h5>Open with</h5><p style="margin:0 0 14px">'+t.mentor.open+'</p>'+
     '<h5>Check they can</h5><ul>'+t.mentor.check.map(c=>'<li>'+c+'</li>').join('')+'</ul>'+
     '<h5>Common slip</h5><p style="margin:0">'+t.mentor.slip+'</p>';
 }
@@ -697,81 +691,13 @@ function setLevel(code,v){
   drawProfile();
 }
 
-/* ---------------- mentor editing a mentee's status ---------------- */
-function buildMentorStatusList(kind,itemKey,getLevel,onSet){
-  const wrap=el('div','mentor-status-list');
-  mentorMentees.forEach(m=>{
-    const row=el('div','mentor-status-row');
-    row.appendChild(el('span','mn',esc(m.username)));
-    const btns=el('div','mini-btns');
-    LEVELS.forEach(([v,label])=>{
-      const b=el('button',null,label); b.type='button';
-      b.dataset.level=v; b.dataset.menteeUid=m.uid;
-      if(kind==='topic') b.dataset.topicCode=itemKey; else b.dataset.caseId=itemKey;
-      b.setAttribute('aria-pressed',String(getLevel(m)===+v));
-      b.addEventListener('click',()=>onSet(m.uid,+v));
-      btns.appendChild(b);
-    });
-    row.appendChild(btns);
-    wrap.appendChild(row);
-  });
-  return wrap;
-}
-
-async function setMenteeTopicLevel(menteeUid,code,v){
-  const m=mentorMentees.find(x=>x.uid===menteeUid);
-  if(!m) return;
-  const prev=m.levels[code]||0;
-  if(prev===v) return;
-  m.levels[code]=v;
-  document.querySelectorAll('[data-mentee-uid="'+menteeUid+'"][data-topic-code="'+code+'"]').forEach(b=>{
-    b.setAttribute('aria-pressed',String(+b.dataset.level===v));
-  });
-  drawProfile();
-  try{
-    await setDoc(doc(db,'progress',menteeUid),{levels:m.levels},{merge:true});
-  }catch(e){
-    console.warn('failed to update mentee topic level',e);
-    m.levels[code]=prev;
-    document.querySelectorAll('[data-mentee-uid="'+menteeUid+'"][data-topic-code="'+code+'"]').forEach(b=>{
-      b.setAttribute('aria-pressed',String(+b.dataset.level===prev));
-    });
-    drawProfile();
-    alert('Could not save that change: '+friendlyAuthError(e));
-  }
-}
-
-async function setMenteeCaseLevel(menteeUid,caseId,v){
-  const m=mentorMentees.find(x=>x.uid===menteeUid);
-  if(!m) return;
-  const prevLevel=m.caseLevels[caseId]||0;
-  if(prevLevel===v) return;
-  m.cases=m.cases||{};
-  const prevCase=m.cases[caseId];
-  m.caseLevels[caseId]=v;
-  m.cases[caseId]=(v===2);
-  document.querySelectorAll('[data-mentee-uid="'+menteeUid+'"][data-case-id="'+caseId+'"]').forEach(b=>{
-    b.setAttribute('aria-pressed',String(+b.dataset.level===v));
-  });
-  drawCaseProfile();
-  try{
-    await setDoc(doc(db,'progress',menteeUid),{caseLevels:m.caseLevels,cases:m.cases},{merge:true});
-  }catch(e){
-    console.warn('failed to update mentee case level',e);
-    m.caseLevels[caseId]=prevLevel;
-    m.cases[caseId]=prevCase;
-    document.querySelectorAll('[data-mentee-uid="'+menteeUid+'"][data-case-id="'+caseId+'"]').forEach(b=>{
-      b.setAttribute('aria-pressed',String(+b.dataset.level===prevLevel));
-    });
-    drawCaseProfile();
-    alert('Could not save that change: '+friendlyAuthError(e));
-  }
-}
-
-/* ---------------- cross-section ---------------- */
+/* ---------------- progress charts ---------------- */
+// one line across the syllabus, rising from "not started" to "confident".
+// Students only: a mentor sees their students' progress on the dashboard.
 const NS='http://www.w3.org/2000/svg';
 function svg(tag,attrs){const n=document.createElementNS(NS,tag);for(const k in attrs)n.setAttribute(k,attrs[k]);return n;}
 const Y=[152,104,52];
+const Y_LABELS=['NOT STARTED','LEARNING','CONFIDENT'];
 
 function smoothPath(pts){
   if(!pts.length) return '';
@@ -785,97 +711,58 @@ function smoothPath(pts){
   return d;
 }
 
-function renderMenteeLegend(){
-  const host=document.getElementById('menteeLegend');
-  if(!mentorMentees.length){ host.hidden=true; host.innerHTML=''; return; }
-  host.hidden=false;
-  host.innerHTML=mentorMentees.map((m,i)=>{
-    const color=MENTEE_COLORS[i%MENTEE_COLORS.length];
-    const conf=TOPICS.filter(t=>(m.levels[t.code]||0)===2).length;
-    return '<span class="m"><i class="sw" style="background:'+color+'"></i><b>'+esc(m.username)+'</b> '+conf+'/'+TOPICS.length+' confident</span>';
-  }).join('');
-}
-
-function drawProfile(){
-  const s=document.getElementById('profile');
+// shared by both charts: axis labels, the filled area under the line, and a
+// clickable point per item. items: [{level, label, title, go}]
+function drawChart(s, items, opts){
   s.textContent='';
-  const L=40,R=940,base=176;
-  const n=TOPICS.length, step=(R-L)/(n-1);
-  const isMentor=isFunctionalMentor(currentUser);
-
+  const L=100,R=940,base=176, n=items.length;
+  if(!n) return;
+  const step=n>1?(R-L)/(n-1):0;
   Y.forEach((y,i)=>{
-    s.appendChild(svg('line',{x1:L-12,y1:y,x2:R+8,y2:y,class:'grid-line'}));
-    const lab=svg('text',{x:2,y:y+3,class:'axis-label'});
-    lab.textContent=['NOT','LEARN','CONF'][i];
+    s.appendChild(svg('line',{x1:L-12,y1:y,x2:R+8,y2:y,class:opts.gridClass}));
+    const lab=svg('text',{x:0,y:y+3,class:opts.axisClass});
+    lab.textContent=Y_LABELS[i];
     s.appendChild(lab);
   });
-
-  let pts=null; // single-line pts, only set (and used for station dots) outside mentor view
-
-  if(isMentor){
-    if(!mentorMentees.length){
-      const msg=svg('text',{x:L,y:100,class:'axis-label'});
-      msg.setAttribute('font-size','13');
-      msg.textContent='No students yet — once a student picks you, their progress shows here.';
-      s.appendChild(msg);
-    }else{
-      mentorMentees.forEach((m,mi)=>{
-        const color=MENTEE_COLORS[mi%MENTEE_COLORS.length];
-        const mpts=TOPICS.map((t,i)=>[+(L+i*step).toFixed(1),Y[m.levels[t.code]||0]]);
-        s.appendChild(svg('path',{d:smoothPath(mpts),fill:'none',stroke:color,'stroke-width':'2.5','stroke-linejoin':'round','stroke-linecap':'round',opacity:'0.92'}));
-        mpts.forEach(([x,y])=>{
-          s.appendChild(svg('circle',{cx:x,cy:y,r:3.5,fill:color,stroke:'#0A1F2B','stroke-width':'1.5'}));
-        });
-      });
-    }
-  }else{
-    const defs=svg('defs');
-    const grad=svg('linearGradient',{id:'hyps',x1:'0',y1:'0',x2:'0',y2:'1',gradientUnits:'objectBoundingBox'});
-    [['0','#C98A2E'],['0.34','#C98A2E'],['0.34','#48B7A6'],['0.68','#48B7A6'],['0.68','#1B7F8E'],['1','#1B7F8E']]
-      .forEach(([o,c])=>grad.appendChild(svg('stop',{offset:o,'stop-color':c,'stop-opacity':'0.85'})));
-    defs.appendChild(grad); s.appendChild(defs);
-
-    pts=TOPICS.map((t,i)=>[+(L+i*step).toFixed(1),Y[state.levels[t.code]||0]]);
-    const area=svg('path',{d:smoothPath(pts)+'L'+pts[n-1][0]+','+base+'L'+pts[0][0]+','+base+'Z',fill:'url(#hyps)'});
-    s.appendChild(area);
-    s.appendChild(svg('path',{d:smoothPath(pts),class:'profile-line'}));
-  }
-
-  TOPICS.forEach((t,i)=>{
-    const x=+(L+i*step).toFixed(1);
+  const defs=svg('defs');
+  const grad=svg('linearGradient',{id:opts.gradId,x1:'0',y1:'0',x2:'0',y2:'1',gradientUnits:'objectBoundingBox'});
+  [['0','#C98A2E'],['0.34','#C98A2E'],['0.34','#48B7A6'],['0.68','#48B7A6'],['0.68','#1B7F8E'],['1','#1B7F8E']]
+    .forEach(([o,c])=>grad.appendChild(svg('stop',{offset:o,'stop-color':c,'stop-opacity':opts.fillOpacity})));
+  defs.appendChild(grad); s.appendChild(defs);
+  const pts=items.map((it,i)=>[+(L+i*step).toFixed(1),Y[it.level]]);
+  s.appendChild(svg('path',{d:smoothPath(pts)+'L'+pts[n-1][0]+','+base+'L'+pts[0][0]+','+base+'Z',fill:'url(#'+opts.gradId+')'}));
+  s.appendChild(svg('path',{d:smoothPath(pts),class:opts.lineClass}));
+  items.forEach((it,i)=>{
+    const [x,y]=pts[i];
     const g=svg('g',{class:'station',tabindex:'0',role:'link'});
-    g.appendChild(svg('rect',{x:x-14,y:20,width:28,height:180,class:'station-hit'}));
-    let on;
-    if(isMentor){
-      on=mentorMentees.some(m=>(m.levels[t.code]||0)===2);
-    }else{
-      const y=pts[i][1];
-      g.appendChild(svg('circle',{cx:x,cy:y,r:4.5,fill:'#0A1F2B',stroke:'#F3F7F5','stroke-width':'2'}));
-      on=(state.levels[t.code]||0)>0;
+    g.appendChild(svg('rect',{x:x-opts.hitW/2,y:20,width:opts.hitW,height:180,class:'station-hit'}));
+    g.appendChild(svg('circle',{cx:x,cy:y,r:opts.dotR,fill:opts.dotFill,stroke:opts.dotStroke,'stroke-width':'2'}));
+    if(it.label){
+      const lab=svg('text',{x:x,y:base+18,'text-anchor':'middle',class:'st-label'+(it.level>0?' on':'')});
+      lab.textContent=it.label;
+      g.appendChild(lab);
     }
-    const lab=svg('text',{x:x,y:base+18,'text-anchor':'middle',class:'st-label'+(on?' on':'')});
-    lab.textContent=t.code;
-    g.appendChild(lab);
-    const title=svg('title'); title.textContent=t.code+' '+t.title;
+    const title=svg('title'); title.textContent=it.title;
     g.appendChild(title);
-    const go=()=>openTopic(t.code);
-    g.addEventListener('click',go);
-    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+    g.addEventListener('click',it.go);
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();it.go();}});
     s.appendChild(g);
   });
+}
 
+let mentorViewShown=false;
+function drawProfile(){
   refreshProgressMarks();
-  document.getElementById('topicKeyGroup').hidden=isMentor;
-  if(isMentor){
-    document.getElementById('transect-h').textContent="Your students' progress through the syllabus";
-    document.getElementById('transect-count').textContent=mentorMentees.length ? mentorMentees.length+' student'+(mentorMentees.length===1?'':'s')+' shown' : 'No students yet';
-    renderMenteeLegend();
-  }else{
-    document.getElementById('transect-h').textContent='Your progress through the syllabus';
-    const conf=TOPICS.filter(t=>(state.levels[t.code]||0)===2).length;
-    document.getElementById('transect-count').textContent=conf+' of '+TOPICS.length+' topics at confident';
-    document.getElementById('menteeLegend').hidden=true;
-  }
+  const isMentor=isFunctionalMentor(currentUser);
+  mentorViewShown=isMentor;
+  document.querySelector('.hero .transect').hidden=isMentor;
+  document.getElementById('heroMentorNote').hidden=!isMentor;
+  if(isMentor) return;
+  drawChart(document.getElementById('profile'),
+    TOPICS.map(t=>({level:state.levels[t.code]||0, label:t.code, title:t.code+' '+t.title, go:()=>openTopic(t.code)})),
+    {gridClass:'grid-line',axisClass:'axis-label',lineClass:'profile-line',gradId:'hyps',fillOpacity:'0.85',hitW:28,dotR:4.5,dotFill:'#0A1F2B',dotStroke:'#F3F7F5'});
+  const conf=TOPICS.filter(t=>(state.levels[t.code]||0)===2).length;
+  document.getElementById('transect-count').textContent=conf+' of '+TOPICS.length+' topics confident';
 }
 
 /* ---------------- render ---------------- */
@@ -893,7 +780,7 @@ function renderTopics(){
   });
 }
 
-/* deep links — #t2-3 opens and scrolls to topic 2.3, #case-1-1-0 to that row
+/* links like #t2-3 open and scroll to topic 2.3, and #case-1-1-0 to that row
    in the Case Studies list (the mentor dashboard links to both) */
 function openHashTarget(){
   const h=decodeURIComponent(location.hash.slice(1));
@@ -926,28 +813,17 @@ function renderCaseList(){
   const host=document.getElementById('case-list'); host.textContent='';
   const isMentor=isFunctionalMentor(currentUser);
   caseFlat().forEach(c=>{
-    const row=el('div','case-row'+(isMentor?' mentor-mode':''));
+    const row=el('div','case-row');
     row.id=caseDomId(c.id);
-    // the whole topic is still one click away, from the bottom of the notes
-    const topicLink=el('button','notes-toggle case-topic-link','Open topic '+c.code+' &rarr;');
+    // the whole topic is one click away, at the bottom of the notes
+    const topicLink=el('button','notes-toggle case-topic-link','Open topic '+c.code);
     topicLink.type='button';
     topicLink.addEventListener('click',()=>openTopic(c.code));
     const {head,box}=caseToggle(c,topicLink);
-    const code=el('span','code mono',c.code);
     const main=el('div','case-row-main'); main.appendChild(head);
-    if(isMentor){
-      const rowHead=el('div','case-row-head');
-      rowHead.appendChild(code); rowHead.appendChild(main);
-      row.appendChild(rowHead);
-      if(mentorMentees.length){
-        row.appendChild(buildMentorStatusList('case',c.id,m=>m.caseLevels[c.id]||0,(menteeUid,v)=>setMenteeCaseLevel(menteeUid,c.id,v)));
-      }else{
-        row.appendChild(el('p','mentee-empty-note','No students yet.'));
-      }
-    }else{
-      row.appendChild(code); row.appendChild(main);
-      row.appendChild(caseLevelButtons(c.id,'status case-status'));
-    }
+    row.appendChild(el('span','code mono',c.code));
+    row.appendChild(main);
+    if(!isMentor) row.appendChild(caseLevelButtons(c.id,'status case-status'));
     if(box) row.appendChild(box);
     host.appendChild(row);
   });
@@ -957,113 +833,36 @@ function setCaseLevel(id,v){
   state.caseLevels[id]=v;
   state.cases[id]=(v===2); // kept in sync for older data and the mentor dashboard
   save(['caseLevels',id],['cases',id]);
-  // every copy of this case's own buttons — topic card and Case Studies list
-  // (a mentor's per-student buttons carry data-mentee-uid and are left alone)
-  document.querySelectorAll('button[data-case-id="'+id+'"]:not([data-mentee-uid])').forEach(b=>{
+  // both copies of this case's buttons: the topic card and the Case Studies list
+  document.querySelectorAll('button[data-case-id="'+id+'"]').forEach(b=>{
     b.setAttribute('aria-pressed',String(+b.dataset.level===v));
   });
   drawCaseProfile();
 }
 
-function renderCaseMenteeLegend(){
-  const host=document.getElementById('caseMenteeLegend');
-  if(!mentorMentees.length){ host.hidden=true; host.innerHTML=''; return; }
-  host.hidden=false;
-  const cases=caseFlat();
-  host.innerHTML=mentorMentees.map((m,i)=>{
-    const color=MENTEE_COLORS[i%MENTEE_COLORS.length];
-    const conf=cases.filter(c=>(m.caseLevels[c.id]||0)===2).length;
-    return '<span class="m"><i class="sw" style="background:'+color+'"></i><b>'+esc(m.username)+'</b> '+conf+'/'+cases.length+' confident</span>';
-  }).join('');
-}
-
 function drawCaseProfile(){
-  const s=document.getElementById('case-profile');
-  s.textContent='';
-  const cases=caseFlat();
-  const n=cases.length;
   const isMentor=isFunctionalMentor(currentUser);
-  if(!n){ document.getElementById('case-transect-count').textContent='0 of 0 case studies at confident'; return; }
-
-  const L=40,R=940,base=176;
-  const step=n>1?(R-L)/(n-1):0;
-
-  Y.forEach((y,i)=>{
-    s.appendChild(svg('line',{x1:L-12,y1:y,x2:R+8,y2:y,class:'case-grid-line'}));
-    const lab=svg('text',{x:2,y:y+3,class:'case-axis-label'});
-    lab.textContent=['NOT','LEARN','CONF'][i];
-    s.appendChild(lab);
-  });
-
-  let pts=null; // only set (and used for the single-user dot) outside mentor view
-
-  if(isMentor){
-    if(!mentorMentees.length){
-      const msg=svg('text',{x:L,y:100,class:'case-axis-label'});
-      msg.setAttribute('font-size','13');
-      msg.textContent='No students yet — once a student picks you, their case study confidence shows here.';
-      s.appendChild(msg);
-    }else{
-      mentorMentees.forEach((m,mi)=>{
-        const color=MENTEE_COLORS[mi%MENTEE_COLORS.length];
-        const mpts=cases.map((c,i)=>[+(L+i*step).toFixed(1),Y[m.caseLevels[c.id]||0]]);
-        s.appendChild(svg('path',{d:smoothPath(mpts),fill:'none',stroke:color,'stroke-width':'2.5','stroke-linejoin':'round','stroke-linecap':'round',opacity:'0.92'}));
-        mpts.forEach(([x,y])=>{
-          s.appendChild(svg('circle',{cx:x,cy:y,r:3.5,fill:color,stroke:'#0D2029','stroke-width':'1.5'}));
-        });
-      });
-    }
-  }else{
-    const defs=svg('defs');
-    const grad=svg('linearGradient',{id:'hyps2',x1:'0',y1:'0',x2:'0',y2:'1',gradientUnits:'objectBoundingBox'});
-    [['0','#C98A2E'],['0.34','#C98A2E'],['0.34','#48B7A6'],['0.68','#48B7A6'],['0.68','#1B7F8E'],['1','#1B7F8E']]
-      .forEach(([o,c])=>grad.appendChild(svg('stop',{offset:o,'stop-color':c,'stop-opacity':'0.18'})));
-    defs.appendChild(grad); s.appendChild(defs);
-
-    pts=cases.map((c,i)=>[+(L+i*step).toFixed(1),Y[state.caseLevels[c.id]||0]]);
-    const area=svg('path',{d:smoothPath(pts)+'L'+pts[n-1][0]+','+base+'L'+pts[0][0]+','+base+'Z',fill:'url(#hyps2)'});
-    s.appendChild(area);
-    s.appendChild(svg('path',{d:smoothPath(pts),class:'case-profile-line'}));
-  }
-
-  cases.forEach((c,i)=>{
-    const x=+(L+i*step).toFixed(1);
-    const g=svg('g',{class:'station',tabindex:'0',role:'link'});
-    g.appendChild(svg('rect',{x:x-10,y:20,width:20,height:180,class:'station-hit'}));
-    if(!isMentor){
-      const y=pts[i][1];
-      g.appendChild(svg('circle',{cx:x,cy:y,r:4,fill:'#FFFFFF',stroke:'#0D2029','stroke-width':'2'}));
-    }
-    const title=svg('title'); title.textContent=c.code+' — '+c.t+(c.src?' ('+c.src+')':'');
-    g.appendChild(title);
-    const go=()=>jumpToCase(c.id);
-    g.addEventListener('click',go);
-    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
-    s.appendChild(g);
-  });
-
-  document.getElementById('caseKeyGroup').hidden=isMentor;
-  document.getElementById('casesBandSub').hidden=isMentor;
-  if(isMentor){
-    document.getElementById('case-transect-h').textContent="Cross-section — your students' case study confidence";
-    document.getElementById('case-transect-count').textContent=mentorMentees.length ? mentorMentees.length+' student'+(mentorMentees.length===1?'':'s')+' shown' : 'No students yet';
-    renderCaseMenteeLegend();
-  }else{
-    document.getElementById('case-transect-h').textContent='Cross-section — your case study confidence';
-    const conf=cases.filter(c=>(state.caseLevels[c.id]||0)===2).length;
-    document.getElementById('case-transect-count').textContent=conf+' of '+n+' case studies at confident';
-    document.getElementById('caseMenteeLegend').hidden=true;
-  }
+  document.querySelector('#cases .transect').hidden=isMentor;
+  document.getElementById('casesBandSub').textContent=isMentor
+    ? 'Every required case study. Click one to read its notes.'
+    : 'Every required case study. Mark one confident once you can give the place, figures and dates from memory.';
+  if(isMentor) return;
+  const cases=caseFlat();
+  drawChart(document.getElementById('case-profile'),
+    cases.map(c=>({level:state.caseLevels[c.id]||0, label:'', title:c.code+' '+c.t+(c.src?' ('+c.src+')':''), go:()=>jumpToCase(c.id)})),
+    {gridClass:'case-grid-line',axisClass:'case-axis-label',lineClass:'case-profile-line',gradId:'hyps2',fillOpacity:'0.18',hitW:20,dotR:4,dotFill:'#FFFFFF',dotStroke:'#0D2029'});
+  const conf=cases.filter(c=>(state.caseLevels[c.id]||0)===2).length;
+  document.getElementById('case-transect-count').textContent=conf+' of '+cases.length+' case studies confident';
 }
 
 function renderStatic(){
   const cb=document.querySelector('#cmd-table tbody');
-  CMDS.forEach(([a,b])=>cb.appendChild(el('tr','','<td class="mono">'+a+'</td><td>'+b+'</td>')));
+  CMDS.forEach(([a,b])=>{ const tr=el('tr','','<td class="mono">'+a+'</td><td>'+b+'</td>'); tr.id='cmd-'+a.toLowerCase(); cb.appendChild(tr); });
   const p4=NOTES.filter(n=>n.topic==='P4');
   if(p4.length){
     const host=document.getElementById('p4-notes');
     host.innerHTML='<h3 style="font-size:20px;margin-bottom:6px;">Techniques from the notes</h3>'+
-      p4.map(n=>'<section class="note-sec"><h4>'+esc(n.title)+'</h4>'+renderNodes(n.nodes)+'</section>').join('');
+      p4.map(n=>'<section class="note-sec" data-note-id="'+n.id+'"><h4>'+esc(n.title)+'</h4>'+renderNodes(n.nodes)+'</section>').join('');
   }
 }
 
@@ -1079,7 +878,7 @@ function setTrack(tr){
 }
 
 document.querySelectorAll('[data-set-track]').forEach(b=>b.addEventListener('click',()=>{
-  // not logged in and reaching for the mentor view — that's an account, not a toggle
+  // not logged in and reaching for the mentor view: that needs an account, not a toggle
   if(!currentUser && b.dataset.setTrack==='mentor'){
     switchAuthTab('login');
     openModal(authBackdrop);
@@ -1101,6 +900,175 @@ document.getElementById('reset').addEventListener('click',()=>{
 });
 
 function refreshAll(){ renderTopics(); renderCaseList(); drawProfile(); drawCaseProfile(); }
+
+/* ==================== search ==================== */
+// Opened with "/" (or "?", the same key with Shift) or the Search button.
+// Covers topics, revision notes, case studies, command words and the
+// exam-skills sections; picking a result opens and scrolls to it.
+const plain=s=>String(s).replace(/<[^>]+>/g,'');
+function nodesText(nodes){
+  return nodes.map(n=>n.k==='ul' ? n.items.map(i=>i.t).join(' ') : n.k==='table' ? n.rows.map(r=>r.join(' ')).join(' ') : (n.t||'')).join(' ');
+}
+let searchIndex=null;
+function buildSearchIndex(){
+  const items=[];
+  TOPICS.forEach(t=>items.push({type:'Topic', title:t.code+' '+t.title, sub:'Theme '+t.theme, code:t.code,
+    text:plain([...t.outcomes,...t.guidance,...t.mentee.do,...t.mentee.q.map(q=>q[0])].join(' ')), go:()=>openTopic(t.code)}));
+  caseFlat().forEach(c=>items.push({type:'Case study', title:c.t, sub:(c.src?c.src+' · ':'')+'Topic '+c.code, code:c.code,
+    text:'', go:()=>openCase(c.id)}));
+  NOTES.forEach(n=>{
+    const t=TOPICS.find(x=>x.code===n.topic);
+    items.push({type:n.case?'Case study notes':'Notes', title:n.title, sub:t ? t.code+' '+t.title : 'Fieldwork and Paper 4', code:n.topic,
+      text:nodesText(n.nodes), go:()=>openNote(n.id)});
+  });
+  CMDS.forEach(([w,d])=>items.push({type:'Command word', title:w, sub:'Command words', text:d, go:()=>flashEl(document.getElementById('cmd-'+w.toLowerCase()))}));
+  [['papers','Your papers','Paper 1, Paper 2 and Paper 4: marks, timings and what each tests'],
+   ['skills','Map and graph skills','Paper 2 grid references, bearings, distance, contours, graphs'],
+   ['fieldwork','Fieldwork','Paper 4 fieldwork techniques'],
+   ['commands','Command words','What each command word asks for']].forEach(([id,title,text])=>
+    items.push({type:'Section', title, sub:'', text, go:()=>document.getElementById(id).scrollIntoView({block:'start'})}));
+  items.forEach(it=>{ it.hay=(it.title+' '+it.sub+' '+it.text).toLowerCase(); it.titleL=it.title.toLowerCase(); });
+  return items;
+}
+
+const escRe=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+// each search word has to match the start of a word, so "ice" finds "ice
+// sheet" but not "service"
+const wordStart=w=>new RegExp('(?<![a-z0-9])'+escRe(w),'i');
+function searchFor(q){
+  const words=q.toLowerCase().split(/\s+/).filter(Boolean);
+  if(!words.length) return [];
+  searchIndex=searchIndex||buildSearchIndex();
+  const res=words.map(wordStart);
+  const typeBoost={'Topic':3,'Case study':2,'Case study notes':1};
+  return searchIndex.map(it=>{
+    let score=0;
+    for(const re of res){
+      if(!re.test(it.hay)) return null; // every word has to appear somewhere
+      score+=re.test(it.titleL) ? 10 : re.test(it.sub) ? 4 : 1;
+    }
+    if(it.code && it.code===q.trim()) score+=30; // typing "2.3" puts topic 2.3 first
+    return {it, score:score+(typeBoost[it.type]||0)};
+  }).filter(Boolean).sort((a,b)=>b.score-a.score).slice(0,30).map(r=>r.it);
+}
+
+// text with the search words wrapped in <mark>, matched in one pass over the
+// raw text so a word can't match inside an earlier <mark> or an &amp;
+function markWords(text, words){
+  const re=new RegExp('(?<![a-z0-9])(?:'+words.map(escRe).join('|')+')','ig');
+  let out='', last=0, m;
+  while((m=re.exec(text))){
+    if(!m[0]){ re.lastIndex++; continue; }
+    out+=esc(text.slice(last,m.index))+'<mark>'+esc(m[0])+'</mark>';
+    last=m.index+m[0].length;
+  }
+  return out+esc(text.slice(last));
+}
+// a short extract around the first matching word in the body text
+function snippet(text, words){
+  if(!text) return '';
+  const at=Math.min(...words.map(w=>{ const i=text.search(wordStart(w)); return i<0?Infinity:i; }));
+  if(at===Infinity) return '';
+  const start=Math.max(0,at-50), end=Math.min(text.length,at+110);
+  return (start>0?'…':'')+text.slice(start,end).trim()+(end<text.length?'…':'');
+}
+
+const searchBackdrop=document.getElementById('searchBackdrop');
+const searchInput=document.getElementById('searchInput');
+const searchResults=document.getElementById('searchResults');
+let searchHits=[], searchActive=0, searchReturnFocus=null;
+
+function renderSearch(){
+  const q=searchInput.value.trim();
+  const words=q.toLowerCase().split(/\s+/).filter(Boolean);
+  searchHits=searchFor(q); searchActive=0;
+  if(!q){ searchResults.innerHTML='<p class="search-empty">Try a topic number like 2.3, a place like Bangladesh, or a word like "longshore".</p>'; searchInput.removeAttribute('aria-activedescendant'); return; }
+  if(!searchHits.length){ searchResults.innerHTML='<p class="search-empty">Nothing found for "'+esc(q)+'".</p>'; searchInput.removeAttribute('aria-activedescendant'); return; }
+  searchResults.innerHTML=searchHits.map((it,i)=>{
+    const snip=wordStart(words[0]).test(it.titleL) ? '' : snippet(it.text,words);
+    return '<button type="button" class="srch-item" role="option" id="srch-'+i+'" data-i="'+i+'">'+
+      '<span class="srch-type">'+esc(it.type)+'</span>'+
+      '<span class="srch-title">'+markWords(it.title,words)+'</span>'+
+      (it.sub?'<span class="srch-sub">'+esc(it.sub)+'</span>':'')+
+      (snip?'<span class="srch-snip">'+markWords(snip,words)+'</span>':'')+'</button>';
+  }).join('');
+  searchResults.querySelectorAll('.srch-item').forEach(b=>{
+    b.addEventListener('click',()=>pickSearch(+b.dataset.i));
+    b.addEventListener('mousemove',()=>{ if(searchActive!==+b.dataset.i){ searchActive=+b.dataset.i; paintActive(false); } });
+  });
+  paintActive(false);
+}
+function paintActive(scroll){
+  searchResults.querySelectorAll('.srch-item').forEach((b,i)=>b.setAttribute('aria-selected',String(i===searchActive)));
+  const cur=document.getElementById('srch-'+searchActive);
+  if(cur){ searchInput.setAttribute('aria-activedescendant',cur.id); if(scroll) cur.scrollIntoView({block:'nearest'}); }
+}
+function openSearch(){
+  if(!searchBackdrop.hidden) return;
+  searchReturnFocus=document.activeElement;
+  openModal(searchBackdrop);
+  searchInput.select(); searchInput.focus();
+  renderSearch();
+}
+function closeSearch(){
+  closeModal(searchBackdrop);
+  if(searchReturnFocus && searchReturnFocus.focus) searchReturnFocus.focus();
+}
+function pickSearch(i){
+  const it=searchHits[i]; if(!it) return;
+  closeModal(searchBackdrop);
+  it.go();
+}
+searchInput.addEventListener('input',renderSearch);
+searchInput.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'){ e.preventDefault(); if(searchHits.length){ searchActive=(searchActive+1)%searchHits.length; paintActive(true); } }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); if(searchHits.length){ searchActive=(searchActive-1+searchHits.length)%searchHits.length; paintActive(true); } }
+  else if(e.key==='Enter'){ e.preventDefault(); pickSearch(searchActive); }
+});
+searchBackdrop.addEventListener('click',e=>{ if(e.target===searchBackdrop) closeSearch(); });
+document.getElementById('btnSearch').addEventListener('click',openSearch);
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    // Escape closes whichever pop-up is open
+    if(!searchBackdrop.hidden){ e.preventDefault(); closeSearch(); return; }
+    [authBackdrop,acctBackdrop].forEach(bd=>{ if(!bd.hidden) closeModal(bd); });
+    return;
+  }
+  if((e.key==='/'||e.key==='?') && !e.ctrlKey && !e.metaKey && !e.altKey){
+    // leave the key alone while someone is typing in a box
+    const t=e.target;
+    if(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    if(!authBackdrop.hidden || !acctBackdrop.hidden) return;
+    e.preventDefault(); openSearch();
+  }
+});
+
+/* where a search result takes you */
+function flashEl(elm){
+  if(!elm) return;
+  elm.scrollIntoView({block:'center'});
+  elm.classList.remove('flash'); void elm.offsetWidth; elm.classList.add('flash');
+}
+function openNote(id){
+  const sec=document.querySelector('.notes .note-sec[data-note-id="'+id+'"], #p4-notes .note-sec[data-note-id="'+id+'"]');
+  if(!sec) return;
+  const card=sec.closest('.topic');
+  if(card){
+    if(card.getAttribute('open-state')!=='1') card.querySelector('.topic-top').click();
+    const box=sec.closest('.notes');
+    if(!box.classList.contains('open')) card.querySelector('.notes-toggle:not(.notes-close)').click();
+  }
+  sec.scrollIntoView({block:'start'});
+  sec.classList.remove('flash'); void sec.offsetWidth; sec.classList.add('flash');
+}
+function openCase(id){
+  const row=document.getElementById(caseDomId(id));
+  if(!row) return;
+  const toggle=row.querySelector('button.case-toggle');
+  if(toggle && toggle.getAttribute('aria-expanded')!=='true') toggle.click();
+  flashEl(row);
+}
 
 /* ==================== account UI ==================== */
 function openModal(bd){ bd.hidden=false; }
@@ -1133,16 +1101,16 @@ document.querySelectorAll('input[name="suRole"]').forEach(r=>r.addEventListener(
   document.getElementById('suInviteNote').hidden=isMentee;
 }));
 
-// the "no mentor" choice — stored as mentorUid: null
+// the "no mentor" choice, stored as mentorUid: null
 const SELF_STUDY='__self';
-const SELF_STUDY_OPTION='<option value="'+SELF_STUDY+'">No mentor — I\'m studying on my own</option>';
+const SELF_STUDY_OPTION='<option value="'+SELF_STUDY+'">No mentor, I\'m studying on my own</option>';
 async function loadMentorOptions(sel){
   sel.innerHTML='<option value="">Loading&hellip;</option>';
   if(!fbReady){ sel.innerHTML='<option value="">Accounts not set up yet</option>'; return; }
   try{
-    // mentors and teachers are the same feature set — a student can be assigned to either
+    // mentors and teachers are the same feature set, so a student can be assigned to either
     const snap=await getDocs(query(collection(db,'users'), where('role','in',['mentor','teacher'])));
-    // only approved ones are choosable — a pending signup isn't active yet
+    // only approved ones are choosable; a pending signup isn't active yet
     const approved=snap.docs.filter(d=>{ const u=d.data(); return u.mentorApproved===true || u.isAdmin===true; });
     sel.innerHTML='<option value="">Choose your mentor or teacher&hellip;</option>'+SELF_STUDY_OPTION+
       approved.map(d=>{ const u=d.data(); return '<option value="'+d.id+'">'+esc(u.username)+' ('+esc(u.role)+')</option>'; }).join('');
@@ -1182,10 +1150,10 @@ document.getElementById('signupForm').addEventListener('submit', async e=>{
     closeModal(authBackdrop);
     document.getElementById('signupForm').reset();
     if(role==='mentor'||role==='teacher'){
-      alert("Account created! A mentor or teacher account needs a quick admin approval before those tools unlock. You can log in any time — you'll just see the regular student view until then.");
+      alert("Account created. An admin needs to approve mentor and teacher accounts before the mentor tools work. Until then you'll see the student view.");
     }
   }catch(e2){
-    // the auth login was created before the Firestore write failed — clean it
+    // the auth login was created before the Firestore write failed, so clean it
     // up so the username isn't stuck "taken" by a profile-less account
     if(cred){ try{ await deleteUser(cred.user); }catch(cleanupErr){ console.warn('could not clean up orphaned auth account',cleanupErr); } }
     if((role==='mentor'||role==='teacher') && e2 && e2.code==='permission-denied'){
@@ -1311,7 +1279,7 @@ document.getElementById('acctUsernameForm').addEventListener('submit', async e=>
     const c=err && err.code || '';
     if(c==='auth/email-already-in-use'){ msg.textContent='That username is already taken.'; }
     else if(c==='auth/requires-recent-login'){ msg.textContent='Please log out and back in, then try again.'; }
-    else if(c==='auth/operation-not-allowed'){ msg.textContent='Username changes are blocked by a Firebase setting — see FIREBASE_SETUP.md.'; }
+    else if(c==='auth/operation-not-allowed'){ msg.textContent='A Firebase setting is blocking username changes. See FIREBASE_SETUP.md.'; }
     else{ msg.textContent=friendlyAuthError(err); }
   }finally{ btn.disabled=false; }
 });
@@ -1324,29 +1292,10 @@ function setLoggedOutUI(){
   document.getElementById('trackMentorBtn').hidden=false;
   document.getElementById('trackMenteeBtn').textContent="I'm a student";
   setTrack('mentee');
-  if(mentorMentees.length){
-    mentorMentees=[];
-    drawProfile(); renderTopics();
-    drawCaseProfile(); renderCaseList();
-  }
+  // a mentor just logged out: bring back the student controls and charts
+  if(mentorViewShown) refreshAll();
 }
 
-/* for a mentor: pull every mentee's progress so the hero charts and each
-   topic/case-study's status block can show — and edit — their mentees
-   instead of the mentor's own (meaningless) local state */
-async function loadMentorMenteesData(uid){
-  try{
-    const snap=await getDocs(query(collection(db,'users'), where('mentorUid','==',uid)));
-    mentorMentees=await Promise.all(snap.docs.map(async d=>{
-      const u=d.data();
-      let prog={levels:{},caseLevels:{},cases:{}};
-      try{ const ps=await getDoc(doc(db,'progress',d.id)); if(ps.exists()) prog=ps.data(); }catch(e){}
-      return {uid:d.id, username:u.username, levels:prog.levels||{}, caseLevels:prog.caseLevels||{}, cases:prog.cases||{}};
-    }));
-  }catch(e){ console.warn('could not load mentees for hero chart', e); mentorMentees=[]; }
-  drawProfile(); renderTopics();
-  drawCaseProfile(); renderCaseList();
-}
 function setLoggedInUI(user){
   document.getElementById('acctGuest').hidden=true;
   document.getElementById('acctUser').hidden=false;
@@ -1356,7 +1305,7 @@ function setLoggedInUI(user){
   const showDash=isMentor||user.isAdmin;
   document.getElementById('railDashboard').hidden=!showDash;
   document.getElementById('acctDashboardBtn').hidden=!showDash;
-  // a student only ever sees their own (student) guidance — no mentor track to switch to;
+  // a student only ever sees their own (student) guidance, with no mentor track to switch to;
   // a mentor/teacher keeps both, but the "student" button becomes an explicit preview, not an identity claim
   document.getElementById('trackMentorBtn').hidden=!isMentor;
   document.getElementById('trackMenteeBtn').textContent=isMentor?'Student View':"I'm a student";
@@ -1367,13 +1316,13 @@ const ready=(async function init(){
   const saved=await load();
   if(saved&&saved.levels){
     state=saved;
-    // saved before owner was tracked — can't tell guest progress from an account's cached copy
+    // saved before owner was tracked, so we can't tell guest progress from an account's cached copy
     if(!('owner' in saved)) state.owner='legacy';
   }
   if(!state.cases) state.cases={};
   if(!state.caseLevels) state.caseLevels={};
   // one-off migration: earlier versions only had a tick box (state.cases) with no
-  // confidence level behind it — carry any pre-existing ticks over as "Confident".
+  // confidence level behind it, so carry any pre-existing ticks over as "Confident".
   Object.keys(state.cases||{}).forEach(id=>{
     if(state.cases[id] && state.caseLevels[id]===undefined) state.caseLevels[id]=2;
   });
@@ -1382,7 +1331,7 @@ const ready=(async function init(){
 })();
 
 /* items where progress made on this device while logged out is AHEAD of the
-   account — only ever raises a level, so accepting can't undo a mentor's marks */
+   account. It only ever raises a level, so accepting can't undo a mentor's marks */
 function guestGains(cloud){
   const gains=[];
   TOPICS.forEach(t=>{ if((state.levels[t.code]||0)>(cloud.levels[t.code]||0)) gains.push(['levels',t.code]); });
@@ -1420,7 +1369,7 @@ if(fbReady){
           const cloud={levels:p.levels||{}, cases:p.cases||{}, caseLevels:p.caseLevels||{}};
           // same tick-box migration as init, for accounts saved before caseLevels existed
           Object.keys(cloud.cases).forEach(id=>{ if(cloud.cases[id] && cloud.caseLevels[id]===undefined) cloud.caseLevels[id]=2; });
-          // only genuine guest progress is offered — a cached copy of any account
+          // only genuine guest progress is offered; a cached copy of any account
           // (this one, another one, or a pre-owner 'legacy' save) defers to the cloud
           const gains=state.owner===null ? guestGains(cloud) : [];
           const nT=gains.filter(g=>g[0]==='levels').length, nC=gains.length-nT;
@@ -1444,7 +1393,7 @@ if(fbReady){
         }
         refreshAll();
       }else if(currentUser.role==='mentor' || currentUser.role==='teacher'){
-        loadMentorMenteesData(user.uid);
+        refreshAll(); // mentor view: notes and guidance only, no progress controls
       }
     }catch(e){ console.warn('auth state handling failed', e); }
   });
