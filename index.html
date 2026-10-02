@@ -267,9 +267,7 @@
       <label>Username<input type="text" id="loginUsername" autocomplete="username" required></label>
       <label>Password<input type="password" id="loginPassword" autocomplete="current-password" required></label>
       <p class="auth-error" id="loginError"></p>
-      <button type="submit" class="acct-btn acct-btn-solid">Log in</button>
-      <p class="auth-note">Forgotten your password? There's no reset email, as accounts don't use real email addresses. Ask an admin to clear your old login so you can sign up again with the same username. Your old progress won't carry over.</p>
-    </form>
+      <button type="submit" class="acct-btn acct-btn-solid">Log in</button>    </form>
 
     <form id="signupForm" class="auth-form" hidden>
       <h3>Create an account</h3>
@@ -616,7 +614,7 @@ function topicCard(t){
       if(box) li.appendChild(box);
       list.appendChild(li);
     });
-    const blk=el('div','blk','<h5>Required case studies</h5>');
+    const blk=el('div','blk blk-cases','<h5>Required case studies</h5>');
     blk.appendChild(list);
     g.appendChild(blk);
   }

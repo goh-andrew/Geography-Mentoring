@@ -277,13 +277,7 @@ rows and **Delete accounts**.
   or "No mentor, I'm studying on my own" (stored as `mentorUid: null`), and
   can change it later from the **Account** button after logging in.
 - Anyone logged in can change their own password from **Account** (it asks for
-  the current one). Nobody can reset a *forgotten* password from the site:
-  that needs Firebase's server-side Admin SDK, which a free-plan static site
-  can't call, and the fake emails can't receive Firebase's reset email. The
-  way back in is to remove the account in **Manage everyone**, delete its
-  login under **Build → Authentication → Users** (see "Deleting accounts"
-  below), and have the student sign up again with the same username. Their
-  old progress doesn't carry over.
+  the current one).
 - Anyone logged in can rename themselves from the **Account** button
   ("Change username", asks for the current password). It moves the account's
   fake login email too, so they use the new name to log in afterwards. See

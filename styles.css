@@ -159,7 +159,12 @@ body[data-track="mentee"] .path[data-for="mentor"]{display:none;}
 .cases{list-style:none;padding:0;margin:0;}
 .cases .case-item{padding:9px 0;border-bottom:1px solid var(--rule);}
 .cases .case-item:last-child{border-bottom:0;}
-.case-line{display:flex;flex-direction:column;gap:8px;}
+/* the case study list gets the card's full width, so opened notes aren't
+   squeezed into half of it; each case's level buttons sit beside its name */
+.grid2>.blk-cases{grid-column:1/-1;}
+.case-line{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:8px 20px;}
+.case-line>.case-toggle{flex:1 1 320px;width:auto;}
+.case-line>.case-levels{flex:0 0 auto;}
 .blank{border-bottom:1px solid var(--lava);display:inline-block;min-width:120px;}
 @keyframes caseFlash{0%{background:rgba(27,127,142,.32);}70%{background:rgba(27,127,142,.32);}100%{background:transparent;}}
 .flash{animation:caseFlash 1.6s ease-out;}
@@ -247,6 +252,13 @@ footer a{color:var(--reef);}
 .acct-btn-solid{background:var(--reef);border-color:var(--reef);color:var(--abyss);font-weight:600;}
 .acct-btn-solid:hover{color:var(--abyss);opacity:.9;}
 .acct-user{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+/* one row in the header: name and role first, then Search, then the rest.
+   The two groups dissolve into the bar so the Search button can sit between
+   their items; a hidden group stays hidden ([hidden] wins). */
+.acct-bar .acct-guest,.acct-bar .acct-user{display:contents;}
+.acct-bar .acct-who{order:1;}
+.acct-bar #btnSearch{order:2;}
+.acct-bar .acct-guest>*,.acct-bar .acct-user>.acct-btn{order:3;}
 .acct-who{font-family:var(--mono);font-size:11px;color:#A9C0BE;letter-spacing:.04em;}
 .acct-who b{color:#F3F7F5;}
 .acct-role-tag{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--abyss);background:var(--reef);padding:2px 6px;margin-left:6px;}

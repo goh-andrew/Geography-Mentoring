@@ -43,7 +43,7 @@
 
   <section class="band" id="adminSection" hidden>
     <div class="band-head"><span class="band-num">Admin</span><h2>Manage everyone</h2></div>
-    <p class="band-sub">Set who mentors who, promote or demote roles, and remove accounts. Role changes ask first; everything else applies immediately.</p>
+    <p class="band-sub">Set who mentors who, edit roles, and remove accounts.</p>
     <p class="pending-banner" id="pendingBanner" hidden></p>
     <p class="auth-note" id="adminMsg"></p>
     <div class="datawrap"><table class="data admin-table" id="adminTable">
@@ -53,7 +53,7 @@
 
     <form class="auth-form" id="inviteForm" style="max-width:420px;margin-top:34px;">
       <h3 style="font-size:17px;">Mentor invite code</h3>
-      <p class="band-sub" style="margin:6px 0 0;">Required to sign up as a mentor or teacher. Changing it stops the old code working. People who already have accounts keep their access.</p>
+      <p class="band-sub" style="margin:6px 0 0;">Required to sign up as a mentor or teacher.</p>
       <label>Current code<input type="text" id="inviteCodeInput" placeholder="Loading&hellip;" autocomplete="off"></label>
       <p class="auth-error" id="inviteMsg"></p>
       <button type="submit" class="acct-btn acct-btn-solid">Save code</button>
@@ -305,8 +305,8 @@ async function loadAdminPanel(){
   const banner=document.getElementById('pendingBanner');
   banner.hidden=!nPending;
   banner.textContent=nPending===1
-    ? '1 mentor or teacher is waiting for approval. They\'re at the top of the table. Tick Approved to give them access.'
-    : nPending+' mentors or teachers are waiting for approval. They\'re at the top of the table. Tick Approved to give them access.';
+    ? '1 mentor or teacher is waiting for approval.'
+    : nPending+' mentors or teachers are waiting for approval.';
 
   tbody.innerHTML = all.map(u=>{
     const isMentee=u.role==='mentee';
