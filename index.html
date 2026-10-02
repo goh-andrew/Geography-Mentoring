@@ -79,13 +79,13 @@
       </div>
       <div class="rail-group">
         <h4>Themes</h4>
-        <a href="#theme1">1 &middot; Population &amp; settlement</a>
-        <a href="#theme2">2 &middot; The natural environment</a>
-        <a href="#theme3">3 &middot; Economic development</a>
+        <a href="#theme1">1 &middot; Population &amp; settlement <span class="rail-count" data-rail-theme="1" title="topics at confident"></span></a>
+        <a href="#theme2">2 &middot; The natural environment <span class="rail-count" data-rail-theme="2" title="topics at confident"></span></a>
+        <a href="#theme3">3 &middot; Economic development <span class="rail-count" data-rail-theme="3" title="topics at confident"></span></a>
+        <a href="#cases">Case Studies</a>
       </div>
       <div class="rail-group">
         <h4>Exam skills</h4>
-        <a href="#cases">Case Studies</a>
         <a href="#papers">Your papers</a>
         <a href="#skills">Map &amp; graph skills</a>
         <a href="#fieldwork">Fieldwork &amp; Paper 4</a>
@@ -155,7 +155,7 @@
               <span><i class="key" style="background:#48B7A6"></i> learning</span>
               <span><i class="key" style="background:#1B7F8E"></i> not started</span>
             </span>
-            <span>Click any station, or a row below, to jump to that topic.</span>
+            <span>Click any station to jump to that case study, or a case study's name to read its notes.</span>
           </div>
           <div class="mentee-legend" id="caseMenteeLegend" hidden></div>
         </div>
@@ -181,7 +181,7 @@
           <article class="paper">
             <span class="pct">27.5%</span>
             <h4>Paper 4 — Alternative to Coursework</h4>
-            <p>60 marks, all compulsory. Marked to the five criteria below, tested through written fieldwork tasks and hypothesis testing.</p>
+            <p>60 marks, all compulsory. Written fieldwork tasks: planning an investigation, collecting and presenting data, testing a hypothesis, and drawing conclusions.</p>
             <span class="time">1 h 30 min &middot; externally assessed</span>
           </article>
         </div>
@@ -231,18 +231,6 @@
           <thead><tr><th style="width:130px">Command</th><th>What the examiner wants</th></tr></thead>
           <tbody></tbody>
         </table></div>
-        <h3 style="margin-top:34px;font-size:20px;">Paper 4 mark levels</h3>
-        <p class="band-sub"></p>
-        <div class="datawrap"><table class="data">
-          <thead><tr><th>Criterion</th><th>Level 1 (1–4)</th><th>Level 2 (5–8)</th><th>Level 3 (9–12)</th></tr></thead>
-          <tbody>
-            <tr><td>Knowledge with understanding</td><td>Simple terms, tentative grasp of the aims</td><td>Appropriate terms, clear link between aims and geography</td><td>Comprehensive, careful terminology, aims tied to key ideas</td></tr>
-            <tr><td>Observation and collection of data</td><td>Basic information, limited sources, simple planning</td><td>Relevant information, valid sources, sound planning</td><td>Detailed data, range of valid sources, clear planning design</td></tr>
-            <tr><td>Organisation and presentation</td><td>Loosely ordered, one simple technique</td><td>Logically ordered, two or more techniques used well</td><td>Coherent, a range of techniques, accurate and relevant</td></tr>
-            <tr><td>Analysis and interpretation</td><td>Descriptive, simple comments</td><td>Valid statements, some explanation attempted</td><td>Thorough interpretation with reasoned explanation</td></tr>
-            <tr><td>Conclusion and evaluation</td><td>Superficial conclusions, little awareness of shortcomings</td><td>Tentative conclusions linked to aims, some evaluation</td><td>Clear conclusions from evidence, weaknesses identified and improved</td></tr>
-          </tbody>
-        </table></div>
       </section>
     </div>
   </div>
@@ -254,6 +242,8 @@
     <p>Progress is saved on this device, and to your account if you're logged in.<button type="button" id="reset" style="font-family:var(--mono);font-size:11px;background:none;border:1px solid rgba(255,255,255,.25);color:#8FA6A4;padding:6px 10px;cursor:pointer;">Reset progress</button></p>
   </div>
 </footer>
+
+<div class="save-status" id="saveStatus" role="status" aria-live="polite" hidden></div>
 
 <div class="modal-backdrop" id="authBackdrop" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
@@ -269,6 +259,7 @@
       <label>Password<input type="password" id="loginPassword" autocomplete="current-password" required></label>
       <p class="auth-error" id="loginError"></p>
       <button type="submit" class="acct-btn acct-btn-solid">Log in</button>
+      <p class="auth-note">Forgotten your password? There's no reset email, as accounts don't use real email addresses. Ask an admin to clear your old login so you can sign up again with the same username — your old progress won't carry over.</p>
     </form>
 
     <form id="signupForm" class="auth-form" hidden>
@@ -301,12 +292,20 @@
     <h3 id="acctPanelTitle">Your account</h3>
     <p class="auth-note" style="margin-top:0;"><b id="acctPanelName" style="color:var(--ink);font-family:var(--body)"></b> &middot; <span id="acctPanelRole"></span></p>
     <p class="auth-note" id="acctPendingNote" hidden>Your account is awaiting admin approval — you'll see the regular student view until then.</p>
-    <div id="acctMenteeSettings" hidden>
-      <label>Your mentor
+    <div id="acctMenteeSettings" class="auth-form" hidden>
+      <label>Your mentor or teacher
         <select id="acctMentorSelect"></select>
       </label>
       <p class="auth-error" id="acctMentorMsg"></p>
     </div>
+
+    <form id="acctPasswordForm" class="auth-form" style="border-top:1px solid var(--rule);margin-top:18px;padding-top:2px;">
+      <label>Current password<input type="password" id="acctPwCurrent" autocomplete="current-password" required></label>
+      <label>New password<input type="password" id="acctPwNew" autocomplete="new-password" required minlength="6"></label>
+      <p class="auth-note">At least 6 characters.</p>
+      <p class="auth-error" id="acctPasswordMsg"></p>
+      <button type="submit" class="acct-btn acct-btn-solid">Change password</button>
+    </form>
 
     <form id="acctUsernameForm" class="auth-form" style="border-top:1px solid var(--rule);margin-top:18px;padding-top:2px;">
       <label>Change username<input type="text" id="acctNewUsername" autocomplete="username" placeholder="new username" required></label>
@@ -324,7 +323,7 @@
 import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword, deleteUser,
   onAuthStateChanged, signOut,
-  EmailAuthProvider, reauthenticateWithCredential, updateEmail
+  EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePassword
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   doc, getDoc, setDoc, collection, query, where, getDocs
@@ -335,6 +334,11 @@ import { DIAGRAMS } from "./diagrams.js";
 import { auth, db, fbReady, usernameToEmail, cleanUsername, friendlyAuthError } from "./cloud.js";
 
 let currentUser=null; // {uid, username, role, mentorUid, isAdmin}
+// ?login=dashboard — sent here by the dashboard's "Log in" button: show the
+// login form, then go back once logged in. Dropped from the URL so a refresh
+// doesn't reopen it.
+const loginReturn=new URLSearchParams(location.search).get('login');
+if(loginReturn) history.replaceState(null,'',location.pathname+location.hash);
 let mentorMentees=[]; // for mentor accounts: [{uid, username, levels, caseLevels}]
 const MENTEE_COLORS=['#48B7A6','#C98A2E','#7C9CFF','#E0607E','#8BD17C','#F2B84B','#5EC8E8','#D98CD9'];
 
@@ -369,7 +373,11 @@ const CMDS = [
 
 /* ---------------- storage ---------------- */
 const KEY='geo0460-progress';
-let state={levels:{},cases:{},caseLevels:{}};
+// owner: null = guest progress made while logged out; a uid = this device's
+// cached copy of that student's account; 'legacy' = saved before owner was
+// tracked, so it could be either (see init and the auth handler)
+const blankState=()=>({levels:{},cases:{},caseLevels:{},owner:null});
+let state=blankState();
 const mem={};
 async function load(){
   try{
@@ -380,15 +388,68 @@ async function load(){
   try{const v=localStorage.getItem(KEY); if(v) return JSON.parse(v);}catch(e){}
   return mem[KEY]?JSON.parse(mem[KEY]):null;
 }
-async function save(){
+async function saveLocal(){
   const v=JSON.stringify(state); mem[KEY]=v;
   let savedLocally=false;
   try{ if(window.storage&&window.storage.set){await window.storage.set(KEY,v); savedLocally=true;} }catch(e){}
   if(!savedLocally){ try{ localStorage.setItem(KEY,v); }catch(e){} }
-  // cloud sync — only mentees have their own progress; mentors read, they don't write
-  if(fbReady && currentUser && currentUser.role==='mentee'){
-    try{ await setDoc(doc(db,'progress',currentUser.uid), {levels:state.levels||{},cases:state.cases||{},caseLevels:state.caseLevels||{},username:currentUser.username,updatedAt:Date.now()}); }
-    catch(e){ console.warn('cloud sync failed', e); }
+}
+// save(...[field,key]) — saves locally, then sends just those fields to the
+// cloud. Writing only what changed (merge) means a student's open page can't
+// overwrite marks their mentor made since the page loaded.
+function save(...entries){
+  saveLocal();
+  entries.forEach(([f,k])=>markDirty(f,k));
+  flushCloud();
+}
+
+/* ---------------- cloud sync ---------------- */
+// only students have their own progress; mentors read (and edit via setMentee*), they don't write here
+const canCloudSave=()=>fbReady && currentUser && currentUser.role==='mentee';
+const dirty=new Map(); // [field,key] pairs not yet confirmed saved to the cloud
+let inFlight=0, saveErr=null;
+function markDirty(f,k){ dirty.set(f+'\u0000'+k,[f,k]); }
+async function flushCloud(){
+  if(!canCloudSave()){ dirty.clear(); return; }
+  if(!dirty.size) return;
+  const entries=[...dirty.values()]; dirty.clear();
+  // values come from the current state, so a retry always sends the latest marks
+  const patch={username:currentUser.username, updatedAt:Date.now()};
+  entries.forEach(([f,k])=>{ (patch[f]=patch[f]||{})[k]=state[f][k]; });
+  const uid=currentUser.uid;
+  inFlight++; renderSaveStatus();
+  try{ await setDoc(doc(db,'progress',uid), patch, {merge:true}); saveErr=null; }
+  catch(e){ console.warn('cloud sync failed', e); saveErr=e; entries.forEach(([f,k])=>markDirty(f,k)); }
+  finally{ inFlight--; renderSaveStatus(); }
+}
+function resetCloudSync(){ dirty.clear(); saveErr=null; showSaveNotice(null); }
+const hasUnsaved=()=>canCloudSave() && (dirty.size>0 || inFlight>0);
+window.addEventListener('beforeunload',e=>{ if(hasUnsaved()){ e.preventDefault(); e.returnValue=''; } });
+
+// "Saving…" only appears if a write is slow (e.g. offline — Firestore queues it
+// and finishes once the connection returns); a failure stays up with a Retry.
+let saveNoticeUp=false, saveTimer=null;
+function showSaveNotice(kind,html){
+  const box=document.getElementById('saveStatus');
+  clearTimeout(saveTimer);
+  if(!kind){ box.hidden=true; saveNoticeUp=false; return; }
+  box.className='save-status '+kind; box.innerHTML=html; box.hidden=false; saveNoticeUp=true;
+}
+function renderSaveStatus(){
+  clearTimeout(saveTimer);
+  if(inFlight){
+    const saving=()=>showSaveNotice('saving','Saving to your account&hellip;');
+    if(saveNoticeUp) saving(); else saveTimer=setTimeout(saving,1500);
+    return;
+  }
+  if(saveErr && dirty.size){
+    showSaveNotice('err','<span>Not saved to your account. '+esc(friendlyAuthError(saveErr))+'</span><button type="button" id="saveRetry">Retry</button>');
+    document.getElementById('saveRetry').addEventListener('click',flushCloud);
+    return;
+  }
+  if(saveNoticeUp){
+    showSaveNotice('ok','Saved to your account.');
+    saveTimer=setTimeout(()=>showSaveNotice(null),2500);
   }
 }
 
@@ -422,16 +483,98 @@ function renderNodes(nodes){
     if(n.k==='diagram'){
       const dg=DIAGRAMS[n.id];
       if(!dg) return '';
-      return '<figure class="diagram">'+dg.svg+'<figcaption>'+esc(dg.caption)+'</figcaption></figure>';
+      // a note can be on the page twice (topic notes + case-study notes), so give
+      // each copy its own SVG ids — otherwise url(#…) can resolve to a hidden copy
+      const copy=++diagramCopy;
+      const svgCopy=dg.svg.replace(/(id="|url\(#)([\w-]+)/g,(m,p,id)=>p+id+'-'+copy);
+      return '<figure class="diagram">'+svgCopy+'<figcaption>'+esc(dg.caption)+'</figcaption></figure>';
     }
     return '';
   }).join('');
+}
+let diagramCopy=0;
+
+const LEVELS=[['0','Not started'],['1','Learning'],['2','Confident']];
+
+/* ---------------- progress tags (topic headers + side nav) ---------------- */
+// what the closed topic card shows: the student's own level, or for a mentor
+// how many of their students are confident on it
+function topicTag(code){
+  if(isFunctionalMentor(currentUser)){
+    if(!mentorMentees.length) return {txt:'',cls:''};
+    const n=mentorMentees.filter(m=>(m.levels[code]||0)===2).length;
+    return {txt:n+'/'+mentorMentees.length+' confident', cls:'lvl-m'};
+  }
+  const l=state.levels[code]||0;
+  return l ? {txt:LEVELS[l][1], cls:'lvl-'+l} : {txt:'',cls:''};
+}
+function applyTopicTag(tagEl,code){
+  const {txt,cls}=topicTag(code);
+  tagEl.textContent=txt; tagEl.className='topic-tag '+cls; tagEl.hidden=!txt;
+}
+function refreshProgressMarks(){
+  TOPICS.forEach(t=>{
+    const tagEl=document.querySelector('[data-tag-code="'+t.code+'"]');
+    if(tagEl) applyTopicTag(tagEl,t.code);
+  });
+  const isMentor=isFunctionalMentor(currentUser);
+  document.querySelectorAll('[data-rail-theme]').forEach(span=>{
+    const ts=TOPICS.filter(t=>t.theme===+span.dataset.railTheme);
+    span.textContent=isMentor ? '' : ts.filter(t=>(state.levels[t.code]||0)===2).length+'/'+ts.length;
+  });
+}
+
+function openTopic(code){
+  const card=document.getElementById('t'+code.replace('.','-'));
+  if(!card) return;
+  if(card.getAttribute('open-state')!=='1') card.querySelector('.topic-top').click();
+  card.scrollIntoView({block:'center'});
+}
+
+/* ---------------- case studies ---------------- */
+function caseNotesHtml(c){
+  return c.notes.map(id=>NOTES.find(n=>n.id===id)).filter(Boolean)
+    .map(n=>'<section class="note-sec"><h4>'+esc(n.title)+'</h4>'+renderNodes(n.nodes)+'</section>').join('');
+}
+// the case study's name doubles as a toggle that opens its notes right there,
+// rather than sending the reader off to another part of the page.
+// returns the clickable head plus the (initially hidden) notes box
+function caseToggle(c, footer){
+  const ex=c.src?esc(c.src):'<span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
+  const label='<span class="ct-title">'+esc(c.t)+'</span><span class="ct-src">Example: '+ex+'</span>';
+  if(!c.notes.length) return {head:el('div','case-toggle',label), box:null};
+  const head=el('button','case-toggle',label+'<span class="ct-more">Show case study notes</span>');
+  head.type='button'; head.setAttribute('aria-expanded','false');
+  const box=el('div','case-notes'); box.hidden=true;
+  head.addEventListener('click',()=>{
+    if(!box.dataset.filled){
+      box.innerHTML=caseNotesHtml(c);
+      if(footer) box.appendChild(footer);
+      box.dataset.filled='1';
+    }
+    box.hidden=!box.hidden;
+    head.setAttribute('aria-expanded',String(!box.hidden));
+    head.querySelector('.ct-more').textContent=(box.hidden?'Show':'Hide')+' case study notes';
+  });
+  return {head, box};
+}
+function caseLevelButtons(id, cls){
+  const wrap=el('div',cls);
+  LEVELS.forEach(([v,label])=>{
+    const b=el('button',null,label); b.type='button';
+    b.dataset.level=v; b.dataset.caseId=id;
+    b.setAttribute('aria-pressed',String((state.caseLevels[id]||0)===+v));
+    b.addEventListener('click',()=>setCaseLevel(id,+v));
+    wrap.appendChild(b);
+  });
+  return wrap;
 }
 
 /* ---------------- topic cards ---------------- */
 function topicCard(t){
   const notes=NOTES.filter(n=>n.topic===t.code);
   const nCase=t.cases.length;
+  const isMentor=isFunctionalMentor(currentUser);
   const card=el('article','topic'); card.id='t'+t.code.replace('.','-');
   card.setAttribute('open-state','0');
 
@@ -441,8 +584,9 @@ function topicCard(t){
   const top=el('button','topic-top');
   top.type='button';
   top.innerHTML='<span class="code">'+t.code+'</span>'+
-    '<span class="topic-head"><span class="topic-title">'+esc(t.title)+'</span><span class="topic-meta">'+meta.join(' &middot; ')+'</span></span>'+
+    '<span class="topic-head"><span class="topic-title">'+esc(t.title)+'</span><span class="topic-tag" data-tag-code="'+t.code+'"></span><span class="topic-meta">'+meta.join(' &middot; ')+'</span></span>'+
     '<span class="chev" aria-hidden="true"></span>';
+  applyTopicTag(top.querySelector('.topic-tag'),t.code);
   top.setAttribute('aria-expanded','false');
   top.addEventListener('click',()=>{
     const open=card.getAttribute('open-state')==='1';
@@ -457,22 +601,48 @@ function topicCard(t){
   g.appendChild(el('div','blk','<h5>What the syllabus asks</h5><ul>'+t.outcomes.map(o=>'<li>'+o+'</li>').join('')+'</ul>'));
   if(t.guidance.length) g.appendChild(el('div','blk','<h5>You must also cover</h5><ul>'+t.guidance.map(o=>'<li>'+o+'</li>').join('')+'</ul>'));
   if(t.cases.length){
-    const ci=t.cases.map((c,i)=>{
-      const id=t.code+':'+i, done=state.cases[id];
-      const ex=c.src?esc(c.src):'<span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
-      return '<li style="align-items:baseline">'+
-        '<label style="display:flex;align-items:baseline;cursor:pointer;margin:0">'+
-        '<input type="checkbox" data-case="'+id+'"'+(done?' checked':'')+'>'+
-        '</label>'+
-        '<span class="case-jump" data-jump="'+id+'" title="Jump to this case study">'+esc(c.t)+'<br><span class="case-src">Example: '+ex+'</span></span></li>';
-    }).join('');
-    g.appendChild(el('div','blk','<h5>Required case studies</h5><ul class="cases">'+ci+'</ul>'));
+    const list=el('ul','cases');
+    t.cases.forEach((c,i)=>{
+      const id=t.code+':'+i;
+      const li=el('li','case-item');
+      const {head,box}=caseToggle({id, code:t.code, t:c.t, src:c.src, notes:c.notes||[]});
+      const line=el('div','case-line'); line.appendChild(head);
+      // same three levels as the Case Studies list; a mentor marks students from there instead
+      if(!isMentor) line.appendChild(caseLevelButtons(id,'mini-btns case-levels'));
+      li.appendChild(line);
+      if(box) li.appendChild(box);
+      list.appendChild(li);
+    });
+    const blk=el('div','blk','<h5>Required case studies</h5>');
+    blk.appendChild(list);
+    g.appendChild(blk);
   }
   body.appendChild(g);
 
   const panel=el('div','panel');
   panel.innerHTML=trackPanel(t);
   body.appendChild(panel);
+
+  // status sits right after the self-check, before the (long) notes, so it's
+  // never buried under them
+  const st=el('div','status');
+  if(isMentor){
+    st.innerHTML='<span class="lab">Students</span>';
+    if(mentorMentees.length){
+      st.appendChild(buildMentorStatusList('topic',t.code,m=>m.levels[t.code]||0,(menteeUid,v)=>setMenteeTopicLevel(menteeUid,t.code,v)));
+    }else{
+      st.appendChild(el('span','mentee-empty-note','No students yet.'));
+    }
+  }else{
+    st.innerHTML='<span class="lab">Status</span>';
+    LEVELS.forEach(([v,label])=>{
+      const b=el('button',null,label); b.type='button'; b.dataset.level=v; b.dataset.code=t.code;
+      b.setAttribute('aria-pressed',String((state.levels[t.code]||0)===+v));
+      b.addEventListener('click',()=>setLevel(t.code,+v));
+      st.appendChild(b);
+    });
+  }
+  body.appendChild(st);
 
   if(notes.length){
     const btn=el('button','notes-toggle',null);
@@ -482,31 +652,22 @@ function topicCard(t){
     box.innerHTML=notes.map(n=>'<section class="note-sec"><h4>'+esc(n.title)+'</h4>'+
       (n.case?'<p class="src"><span class="flag">Case study</span></p>':'')+
       renderNodes(n.nodes)+'</section>').join('');
+    // a second close button at the bottom, so finishing the notes doesn't mean
+    // scrolling all the way back up to the first one
+    const close=el('button','notes-toggle notes-close','Hide revision notes');
+    close.type='button';
+    box.appendChild(close);
     btn.addEventListener('click',()=>{
       const open=box.classList.toggle('open');
       btn.textContent=(open?'Hide revision notes':'Open revision notes');
     });
+    close.addEventListener('click',()=>{
+      box.classList.remove('open');
+      btn.textContent='Open revision notes';
+      btn.scrollIntoView({block:'center'});
+    });
     body.appendChild(btn); body.appendChild(box);
   }
-
-  const st=el('div','status');
-  if(isFunctionalMentor(currentUser)){
-    st.innerHTML='<span class="lab">Students</span>';
-    if(mentorMentees.length){
-      st.appendChild(buildMentorStatusList('topic',t.code,m=>m.levels[t.code]||0,(menteeUid,v)=>setMenteeTopicLevel(menteeUid,t.code,v)));
-    }else{
-      st.appendChild(el('span','mentee-empty-note','No students yet.'));
-    }
-  }else{
-    st.innerHTML='<span class="lab">Status</span>';
-    [['0','Not started'],['1','Learning'],['2','Confident']].forEach(([v,label])=>{
-      const b=el('button',null,label); b.type='button'; b.dataset.level=v; b.dataset.code=t.code;
-      b.setAttribute('aria-pressed',String((state.levels[t.code]||0)===+v));
-      b.addEventListener('click',()=>setLevel(t.code,+v));
-      st.appendChild(b);
-    });
-  }
-  body.appendChild(st);
 
   card.appendChild(body);
   return card;
@@ -518,7 +679,10 @@ function trackPanel(t){
     return '<span class="role-note">Student</span><h5>How to revise this</h5><ul>'+
       t.mentee.do.map(d=>'<li>'+d+'</li>').join('')+'</ul>'+
       '<h5>Self-check — answer to the marks</h5><ul class="qs">'+
-      t.mentee.q.map(q=>'<li><span>'+esc(q[0])+'</span><span class="marks">['+q[1]+']</span></li>').join('')+'</ul>';
+      t.mentee.q.map(q=>'<li><div class="q-line"><span>'+esc(q[0])+'</span><span class="marks">['+q[1]+']</span></div>'+
+        (q[2]&&q[2].length ? '<details class="ans"><summary>Answered it? See what a good answer includes</summary><ul>'+
+          q[2].map(p=>'<li>'+esc(p)+'</li>').join('')+'</ul></details>' : '')+
+        '</li>').join('')+'</ul>';
   }
   return '<span class="role-note">Mentor</span><h5>Open with</h5><p style="margin:0 0 14px">'+t.mentor.open+'</p>'+
     '<h5>Check they can</h5><ul>'+t.mentor.check.map(c=>'<li>'+c+'</li>').join('')+'</ul>'+
@@ -526,7 +690,7 @@ function trackPanel(t){
 }
 
 function setLevel(code,v){
-  state.levels[code]=v; save();
+  state.levels[code]=v; save(['levels',code]);
   document.querySelectorAll('.status button[data-code="'+code+'"]').forEach(b=>{
     b.setAttribute('aria-pressed',String(+b.dataset.level===v));
   });
@@ -540,7 +704,7 @@ function buildMentorStatusList(kind,itemKey,getLevel,onSet){
     const row=el('div','mentor-status-row');
     row.appendChild(el('span','mn',esc(m.username)));
     const btns=el('div','mini-btns');
-    [['0','Not started'],['1','Learning'],['2','Confident']].forEach(([v,label])=>{
+    LEVELS.forEach(([v,label])=>{
       const b=el('button',null,label); b.type='button';
       b.dataset.level=v; b.dataset.menteeUid=m.uid;
       if(kind==='topic') b.dataset.topicCode=itemKey; else b.dataset.caseId=itemKey;
@@ -694,17 +858,13 @@ function drawProfile(){
     g.appendChild(lab);
     const title=svg('title'); title.textContent=t.code+' '+t.title;
     g.appendChild(title);
-    const go=()=>{
-      const card=document.getElementById('t'+t.code.replace('.','-'));
-      if(!card)return;
-      if(card.getAttribute('open-state')!=='1') card.querySelector('.topic-top').click();
-      card.scrollIntoView({block:'center'});
-    };
+    const go=()=>openTopic(t.code);
     g.addEventListener('click',go);
     g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
     s.appendChild(g);
   });
 
+  refreshProgressMarks();
   document.getElementById('topicKeyGroup').hidden=isMentor;
   if(isMentor){
     document.getElementById('transect-h').textContent="Your students' progress through the syllabus";
@@ -720,18 +880,32 @@ function drawProfile(){
 
 /* ---------------- render ---------------- */
 function renderTopics(){
+  // re-rendering (e.g. once a login finishes) shouldn't snap open cards shut
+  const wasOpen=new Set([...document.querySelectorAll('.topic[open-state="1"]')].map(c=>c.id));
   [1,2,3].forEach(th=>{
     const host=document.querySelector('[data-topics="'+th+'"]');
     host.textContent='';
-    TOPICS.filter(t=>t.theme===th).forEach(t=>host.appendChild(topicCard(t)));
-  });
-  document.querySelectorAll('input[data-case]').forEach(cb=>{
-    cb.addEventListener('change',()=>{setCaseLevel(cb.dataset.case, cb.checked?2:0);});
-  });
-  document.querySelectorAll('[data-jump]').forEach(elm=>{
-    elm.addEventListener('click',()=>jumpToCase(elm.dataset.jump));
+    TOPICS.filter(t=>t.theme===th).forEach(t=>{
+      const card=topicCard(t);
+      if(wasOpen.has(card.id)){ card.setAttribute('open-state','1'); card.querySelector('.topic-top').setAttribute('aria-expanded','true'); }
+      host.appendChild(card);
+    });
   });
 }
+
+/* deep links — #t2-3 opens and scrolls to topic 2.3, #case-1-1-0 to that row
+   in the Case Studies list (the mentor dashboard links to both) */
+function openHashTarget(){
+  const h=decodeURIComponent(location.hash.slice(1));
+  const m=h.match(/^t(\d)-(\d)$/);
+  if(m){ openTopic(m[1]+'.'+m[2]); return; }
+  if(/^case-[\w-]+$/.test(h) && document.getElementById(h)){
+    const row=document.getElementById(h);
+    row.scrollIntoView({block:'center'});
+    row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
+  }
+}
+window.addEventListener('hashchange',openHashTarget);
 
 function caseDomId(id){ return 'case-'+id.replace(/[^a-zA-Z0-9]/g,'-'); }
 
@@ -744,7 +918,7 @@ function jumpToCase(id){
 
 function caseFlat(){
   const out=[];
-  TOPICS.forEach(t=>t.cases.forEach((c,i)=>out.push({id:t.code+':'+i, code:t.code, t:c.t, src:c.src})));
+  TOPICS.forEach(t=>t.cases.forEach((c,i)=>out.push({id:t.code+':'+i, code:t.code, t:c.t, src:c.src, notes:c.notes||[]})));
   return out;
 }
 
@@ -754,53 +928,40 @@ function renderCaseList(){
   caseFlat().forEach(c=>{
     const row=el('div','case-row'+(isMentor?' mentor-mode':''));
     row.id=caseDomId(c.id);
-    const ex=c.src?esc(c.src):'<span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
+    // the whole topic is still one click away, from the bottom of the notes
+    const topicLink=el('button','notes-toggle case-topic-link','Open topic '+c.code+' &rarr;');
+    topicLink.type='button';
+    topicLink.addEventListener('click',()=>openTopic(c.code));
+    const {head,box}=caseToggle(c,topicLink);
+    const code=el('span','code mono',c.code);
+    const main=el('div','case-row-main'); main.appendChild(head);
     if(isMentor){
-      row.innerHTML='<div class="case-row-head"><span class="code mono">'+c.code+'</span>'+
-        '<div class="case-row-main"><p class="case-row-title">'+esc(c.t)+'</p>'+
-        '<p class="case-row-src">Example: '+ex+'</p></div></div>';
+      const rowHead=el('div','case-row-head');
+      rowHead.appendChild(code); rowHead.appendChild(main);
+      row.appendChild(rowHead);
       if(mentorMentees.length){
         row.appendChild(buildMentorStatusList('case',c.id,m=>m.caseLevels[c.id]||0,(menteeUid,v)=>setMenteeCaseLevel(menteeUid,c.id,v)));
       }else{
         row.appendChild(el('p','mentee-empty-note','No students yet.'));
       }
-      row.addEventListener('click',e=>{
-        if(e.target.closest('button')) return;
-        const card=document.getElementById('t'+c.code.replace('.','-'));
-        if(!card) return;
-        if(card.getAttribute('open-state')!=='1') card.querySelector('.topic-top').click();
-        card.scrollIntoView({block:'center'});
-      });
     }else{
-      row.innerHTML='<span class="code mono">'+c.code+'</span>'+
-        '<div class="case-row-main"><p class="case-row-title">'+esc(c.t)+'</p>'+
-        '<p class="case-row-src">Example: '+ex+'</p></div>'+
-        '<div class="status case-status">'+
-          [['0','Not started'],['1','Learning'],['2','Confident']].map(([v,label])=>
-            '<button type="button" data-level="'+v+'" data-case-id="'+c.id+'" aria-pressed="'+(String((state.caseLevels[c.id]||0)===+v))+'">'+label+'</button>'
-          ).join('')+
-        '</div>';
-      row.addEventListener('click',e=>{
-        const btn=e.target.closest('button[data-case-id]');
-        if(btn){ setCaseLevel(c.id,+btn.dataset.level); return; }
-        const card=document.getElementById('t'+c.code.replace('.','-'));
-        if(!card) return;
-        if(card.getAttribute('open-state')!=='1') card.querySelector('.topic-top').click();
-        card.scrollIntoView({block:'center'});
-      });
+      row.appendChild(code); row.appendChild(main);
+      row.appendChild(caseLevelButtons(c.id,'status case-status'));
     }
+    if(box) row.appendChild(box);
     host.appendChild(row);
   });
 }
 
 function setCaseLevel(id,v){
   state.caseLevels[id]=v;
-  state.cases[id]=(v===2); // the topic-card tick box IS "confident" on this case study
-  save();
-  document.querySelectorAll('.case-row button[data-case-id="'+id+'"]').forEach(b=>{
+  state.cases[id]=(v===2); // kept in sync for older data and the mentor dashboard
+  save(['caseLevels',id],['cases',id]);
+  // every copy of this case's own buttons — topic card and Case Studies list
+  // (a mentor's per-student buttons carry data-mentee-uid and are left alone)
+  document.querySelectorAll('button[data-case-id="'+id+'"]:not([data-mentee-uid])').forEach(b=>{
     b.setAttribute('aria-pressed',String(+b.dataset.level===v));
   });
-  document.querySelectorAll('input[data-case="'+id+'"]').forEach(cb=>{ cb.checked=state.cases[id]; });
   drawCaseProfile();
 }
 
@@ -875,12 +1036,7 @@ function drawCaseProfile(){
     }
     const title=svg('title'); title.textContent=c.code+' — '+c.t+(c.src?' ('+c.src+')':'');
     g.appendChild(title);
-    const go=()=>{
-      const card=document.getElementById('t'+c.code.replace('.','-'));
-      if(!card)return;
-      if(card.getAttribute('open-state')!=='1') card.querySelector('.topic-top').click();
-      card.scrollIntoView({block:'center'});
-    };
+    const go=()=>jumpToCase(c.id);
     g.addEventListener('click',go);
     g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
     s.appendChild(g);
@@ -932,7 +1088,16 @@ document.querySelectorAll('[data-set-track]').forEach(b=>b.addEventListener('cli
   setTrack(b.dataset.setTrack);
 }));
 document.getElementById('reset').addEventListener('click',()=>{
-  state={levels:{},cases:{},caseLevels:{}}; save(); refreshAll();
+  const msg=canCloudSave()
+    ? 'Reset all your progress back to "Not started"? This also clears it from your account, so your mentor or teacher will see it reset too. This can\'t be undone.'
+    : 'Reset all your progress on this device back to "Not started"? This can\'t be undone.';
+  if(!confirm(msg)) return;
+  // set every item to 0 rather than emptying the maps, so the reset goes through
+  // the same field-by-field cloud save (and Retry) as any other change
+  const entries=[];
+  TOPICS.forEach(t=>{ state.levels[t.code]=0; entries.push(['levels',t.code]); });
+  caseFlat().forEach(c=>{ state.caseLevels[c.id]=0; state.cases[c.id]=false; entries.push(['caseLevels',c.id],['cases',c.id]); });
+  save(...entries); refreshAll();
 });
 
 function refreshAll(){ renderTopics(); renderCaseList(); drawProfile(); drawCaseProfile(); }
@@ -968,6 +1133,9 @@ document.querySelectorAll('input[name="suRole"]').forEach(r=>r.addEventListener(
   document.getElementById('suInviteNote').hidden=isMentee;
 }));
 
+// the "no mentor" choice — stored as mentorUid: null
+const SELF_STUDY='__self';
+const SELF_STUDY_OPTION='<option value="'+SELF_STUDY+'">No mentor — I\'m studying on my own</option>';
 async function loadMentorOptions(sel){
   sel.innerHTML='<option value="">Loading&hellip;</option>';
   if(!fbReady){ sel.innerHTML='<option value="">Accounts not set up yet</option>'; return; }
@@ -976,10 +1144,13 @@ async function loadMentorOptions(sel){
     const snap=await getDocs(query(collection(db,'users'), where('role','in',['mentor','teacher'])));
     // only approved ones are choosable — a pending signup isn't active yet
     const approved=snap.docs.filter(d=>{ const u=d.data(); return u.mentorApproved===true || u.isAdmin===true; });
-    if(!approved.length){ sel.innerHTML='<option value="">No mentors or teachers yet</option>'; return; }
-    sel.innerHTML='<option value="">Choose your mentor or teacher&hellip;</option>'+
+    sel.innerHTML='<option value="">Choose your mentor or teacher&hellip;</option>'+SELF_STUDY_OPTION+
       approved.map(d=>{ const u=d.data(); return '<option value="'+d.id+'">'+esc(u.username)+' ('+esc(u.role)+')</option>'; }).join('');
-  }catch(e){ sel.innerHTML='<option value="">Could not load the list</option>'; console.warn(e); }
+  }catch(e){
+    // studying on your own still works even if the list can't load
+    sel.innerHTML='<option value="">Could not load mentors or teachers</option>'+SELF_STUDY_OPTION;
+    console.warn(e);
+  }
 }
 
 document.getElementById('signupForm').addEventListener('submit', async e=>{
@@ -989,10 +1160,11 @@ document.getElementById('signupForm').addEventListener('submit', async e=>{
   const username=cleanUsername(rawUsername);
   const password=document.getElementById('suPassword').value;
   const role=document.querySelector('input[name="suRole"]:checked').value;
-  const mentorUid=document.getElementById('suMentor').value;
+  const mentorChoice=document.getElementById('suMentor').value;
+  const mentorUid=mentorChoice===SELF_STUDY ? null : mentorChoice;
   const inviteCode=document.getElementById('suInviteCode').value.trim();
   if(!username){ errEl.textContent='Enter a username.'; return; }
-  if(role==='mentee' && !mentorUid){ errEl.textContent='Choose your mentor or teacher.'; return; }
+  if(role==='mentee' && !mentorChoice){ errEl.textContent='Choose your mentor or teacher, or "studying on my own".'; return; }
   if((role==='mentor'||role==='teacher') && !inviteCode){ errEl.textContent='Enter the invite code.'; return; }
   if(!fbReady){ errEl.textContent=friendlyAuthError(); return; }
   let cred=null;
@@ -1005,6 +1177,7 @@ document.getElementById('signupForm').addEventListener('submit', async e=>{
     await setDoc(doc(db,'users',uid), userDoc);
     if(role==='mentee'){
       await setDoc(doc(db,'progress',uid), {levels:state.levels||{},cases:state.cases||{},caseLevels:state.caseLevels||{},username,updatedAt:Date.now()});
+      state.owner=uid; saveLocal(); // what's on this device is now that account's copy
     }
     closeModal(authBackdrop);
     document.getElementById('signupForm').reset();
@@ -1031,12 +1204,17 @@ document.getElementById('loginForm').addEventListener('submit', async e=>{
   if(!fbReady){ errEl.textContent=friendlyAuthError(); return; }
   try{
     await signInWithEmailAndPassword(auth, usernameToEmail(username), password);
+    if(loginReturn==='dashboard'){ location.href='dashboard.html'; return; }
     closeModal(authBackdrop);
     document.getElementById('loginForm').reset();
   }catch(e2){ errEl.textContent=friendlyAuthError(e2); }
 });
 
-document.getElementById('btnLogout').addEventListener('click',()=>{ if(fbReady) signOut(auth); });
+document.getElementById('btnLogout').addEventListener('click',()=>{
+  if(!fbReady) return;
+  if(hasUnsaved() && !confirm("Some of your progress hasn't reached your account yet. Log out anyway? Those changes will be lost.")) return;
+  signOut(auth);
+});
 
 document.getElementById('btnAccount').addEventListener('click', async ()=>{
   if(!currentUser) return;
@@ -1048,21 +1226,47 @@ document.getElementById('btnAccount').addEventListener('click', async ()=>{
   if(currentUser.role==='mentee'){
     const sel=document.getElementById('acctMentorSelect');
     await loadMentorOptions(sel);
-    if(currentUser.mentorUid) sel.value=currentUser.mentorUid;
+    sel.value=currentUser.mentorUid || SELF_STUDY;
     document.getElementById('acctMentorMsg').textContent='';
   }
   document.getElementById('acctUsernameForm').reset();
   document.getElementById('acctUsernameMsg').textContent='';
+  document.getElementById('acctPasswordForm').reset();
+  document.getElementById('acctPasswordMsg').textContent='';
   openModal(acctBackdrop);
 });
 document.getElementById('acctMentorSelect').addEventListener('change', async e=>{
   const msg=document.getElementById('acctMentorMsg');
   if(!e.target.value || !currentUser) return;
+  const mentorUid=e.target.value===SELF_STUDY ? null : e.target.value;
   try{
-    await setDoc(doc(db,'users',currentUser.uid), {mentorUid:e.target.value}, {merge:true});
-    currentUser.mentorUid=e.target.value;
+    await setDoc(doc(db,'users',currentUser.uid), {mentorUid}, {merge:true});
+    currentUser.mentorUid=mentorUid;
     msg.style.color='var(--current)'; msg.textContent='Saved.';
   }catch(err){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(err); }
+});
+
+document.getElementById('acctPasswordForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const msg=document.getElementById('acctPasswordMsg');
+  msg.style.color='var(--lava)';
+  if(!currentUser || !fbReady || !auth.currentUser){ msg.textContent=friendlyAuthError(); return; }
+  const current=document.getElementById('acctPwCurrent').value;
+  const next=document.getElementById('acctPwNew').value;
+  if(next.length<6){ msg.textContent='New password needs at least 6 characters.'; return; }
+  if(next===current){ msg.textContent='That is the same as your current password.'; return; }
+  const btn=e.target.querySelector('button[type="submit"]');
+  btn.disabled=true;
+  try{
+    await reauthenticateWithCredential(auth.currentUser, EmailAuthProvider.credential(usernameToEmail(currentUser.username), current));
+    await updatePassword(auth.currentUser, next);
+    e.target.reset();
+    msg.style.color='var(--current)';
+    msg.textContent='Password changed. Use the new one next time you log in.';
+  }catch(err){
+    const c=err && err.code || '';
+    msg.textContent = (c==='auth/invalid-credential'||c==='auth/wrong-password') ? 'Your current password is wrong.' : friendlyAuthError(err);
+  }finally{ btn.disabled=false; }
 });
 
 /* Change username. The login identity is a fake email derived from the
@@ -1159,10 +1363,50 @@ function setLoggedInUI(user){
   setTrack(isMentor?'mentor':'mentee');
 }
 
+const ready=(async function init(){
+  const saved=await load();
+  if(saved&&saved.levels){
+    state=saved;
+    // saved before owner was tracked — can't tell guest progress from an account's cached copy
+    if(!('owner' in saved)) state.owner='legacy';
+  }
+  if(!state.cases) state.cases={};
+  if(!state.caseLevels) state.caseLevels={};
+  // one-off migration: earlier versions only had a tick box (state.cases) with no
+  // confidence level behind it — carry any pre-existing ticks over as "Confident".
+  Object.keys(state.cases||{}).forEach(id=>{
+    if(state.cases[id] && state.caseLevels[id]===undefined) state.caseLevels[id]=2;
+  });
+  renderTopics(); renderCaseList(); renderStatic(); drawProfile(); drawCaseProfile();
+  openHashTarget();
+})();
+
+/* items where progress made on this device while logged out is AHEAD of the
+   account — only ever raises a level, so accepting can't undo a mentor's marks */
+function guestGains(cloud){
+  const gains=[];
+  TOPICS.forEach(t=>{ if((state.levels[t.code]||0)>(cloud.levels[t.code]||0)) gains.push(['levels',t.code]); });
+  caseFlat().forEach(c=>{ if((state.caseLevels[c.id]||0)>(cloud.caseLevels[c.id]||0)) gains.push(['caseLevels',c.id]); });
+  return gains;
+}
+
 /* ==================== auth state ==================== */
 if(fbReady){
   onAuthStateChanged(auth, async user=>{
-    if(!user){ currentUser=null; setLoggedOutUI(); return; }
+    await ready; // local progress must be loaded before deciding what to keep
+    if(!user){
+      currentUser=null; resetCloudSync();
+      if(state.owner==='legacy'){ state.owner=null; saveLocal(); }
+      else if(state.owner){
+        // the last account's progress shouldn't stay on screen (or be picked
+        // up as someone else's) once they've logged out on this device
+        state=blankState(); saveLocal(); refreshAll();
+      }
+      setLoggedOutUI();
+      if(loginReturn){ switchAuthTab('login'); openModal(authBackdrop); }
+      return;
+    }
+    if(loginReturn==='dashboard'){ location.replace('dashboard.html'); return; } // already logged in
     try{
       const uSnap=await getDoc(doc(db,'users',user.uid));
       if(!uSnap.exists()){ currentUser=null; setLoggedOutUI(); return; }
@@ -1173,9 +1417,30 @@ if(fbReady){
         const pSnap=await getDoc(doc(db,'progress',user.uid));
         if(pSnap.exists()){
           const p=pSnap.data();
-          state={levels:p.levels||{}, cases:p.cases||{}, caseLevels:p.caseLevels||{}};
+          const cloud={levels:p.levels||{}, cases:p.cases||{}, caseLevels:p.caseLevels||{}};
+          // same tick-box migration as init, for accounts saved before caseLevels existed
+          Object.keys(cloud.cases).forEach(id=>{ if(cloud.cases[id] && cloud.caseLevels[id]===undefined) cloud.caseLevels[id]=2; });
+          // only genuine guest progress is offered — a cached copy of any account
+          // (this one, another one, or a pre-owner 'legacy' save) defers to the cloud
+          const gains=state.owner===null ? guestGains(cloud) : [];
+          const nT=gains.filter(g=>g[0]==='levels').length, nC=gains.length-nT;
+          const what=[nT?nT+' topic'+(nT===1?'':'s'):'', nC?nC+' case stud'+(nC===1?'y':'ies'):''].filter(Boolean).join(' and ');
+          const keep=gains.length>0 && confirm('While logged out, you moved '+what+' further along on this device than your account has them.\n\nAdd that progress to your account?\n\nOK adds it. Cancel discards it and uses what your account already has.');
+          const guest=state;
+          state={...cloud, owner:user.uid};
+          if(keep){
+            const entries=[];
+            gains.forEach(([f,k])=>{
+              state[f][k]=guest[f][k]; entries.push([f,k]);
+              if(f==='caseLevels'){ state.cases[k]=(guest[f][k]===2); entries.push(['cases',k]); }
+            });
+            save(...entries);
+          }else{
+            saveLocal();
+          }
         }else{
           await setDoc(doc(db,'progress',user.uid), {levels:state.levels||{},cases:state.cases||{},caseLevels:state.caseLevels||{},username:currentUser.username,updatedAt:Date.now()});
+          state.owner=user.uid; saveLocal();
         }
         refreshAll();
       }else if(currentUser.role==='mentor' || currentUser.role==='teacher'){
@@ -1186,18 +1451,6 @@ if(fbReady){
 }else{
   setLoggedOutUI();
 }
-
-(async function init(){
-  const saved=await load();
-  if(saved&&saved.levels) state=saved;
-  if(!state.caseLevels) state.caseLevels={};
-  // one-off migration: earlier versions only had a tick box (state.cases) with no
-  // confidence level behind it — carry any pre-existing ticks over as "Confident".
-  Object.keys(state.cases||{}).forEach(id=>{
-    if(state.cases[id] && state.caseLevels[id]===undefined) state.caseLevels[id]=2;
-  });
-  renderTopics(); renderCaseList(); renderStatic(); drawProfile(); drawCaseProfile();
-})();
 </script>
 </body>
 </html>

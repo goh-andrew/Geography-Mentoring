@@ -28,23 +28,28 @@
   <div class="gate" id="gate" hidden>
     <h2 id="gateTitle">Not available</h2>
     <p id="gateMsg"></p>
+    <p id="gateLogin" hidden><a class="acct-btn acct-btn-solid" href="index.html?login=dashboard">Log in</a></p>
     <p><a href="index.html">&larr; Back to the site</a></p>
   </div>
 
   <section class="band" id="menteesSection" hidden>
-    <div class="band-head"><span class="band-num">Mentoring</span><h2>My students</h2></div>
-    <p class="band-sub">Progress synced from each student's own device the last time they had it open.</p>
-    <div class="mentee-list" id="menteeList"></div>
+    <div id="studentListView">
+      <div class="band-head"><span class="band-num">Mentoring</span><h2>My students</h2></div>
+      <p class="band-sub">Progress synced from each student's own device the last time they had it open. Click a student to see everything they've marked.</p>
+      <div id="menteeList"></div>
+    </div>
+    <div id="studentDetailView" hidden></div>
   </section>
 
   <section class="band" id="adminSection" hidden>
     <div class="band-head"><span class="band-num">Admin</span><h2>Manage everyone</h2></div>
-    <p class="band-sub">Set who mentors who, promote or demote roles, and remove accounts. Changes apply immediately.</p>
+    <p class="band-sub">Set who mentors who, promote or demote roles, and remove accounts. Role changes ask first; everything else applies immediately.</p>
+    <p class="pending-banner" id="pendingBanner" hidden></p>
+    <p class="auth-note" id="adminMsg"></p>
     <div class="datawrap"><table class="data admin-table" id="adminTable">
       <thead><tr><th>Username</th><th>Role</th><th>Approved</th><th>Mentor</th><th>Admin</th><th></th></tr></thead>
       <tbody><tr><td colspan="6">Loading&hellip;</td></tr></tbody>
     </table></div>
-    <p class="auth-note" id="adminMsg"></p>
 
     <form class="auth-form" id="inviteForm" style="max-width:420px;margin-top:34px;">
       <h3 style="font-size:17px;">Mentor invite code</h3>
@@ -79,9 +84,10 @@ let currentUser=null;
 function roleLabel(role){ return role==='mentee' ? 'student' : role; }
 function isStaffRole(role){ return role==='mentor' || role==='teacher'; }
 
-function showGate(title, msg){
+function showGate(title, msg, withLogin){
   document.getElementById('gateTitle').textContent=title;
   document.getElementById('gateMsg').textContent=msg;
+  document.getElementById('gateLogin').hidden=!withLogin;
   document.getElementById('gate').hidden=false;
   document.getElementById('menteesSection').hidden=true;
   document.getElementById('adminSection').hidden=true;
@@ -89,42 +95,145 @@ function showGate(title, msg){
 
 document.getElementById('btnLogout').addEventListener('click',()=>{ if(fbReady) signOut(auth); });
 
-/* ==================== mentor: my mentees ==================== */
+/* ==================== mentor: my students ==================== */
+const THEMES={1:'Population and settlement',2:'The natural environment',3:'Economic development'};
+const LEVEL_LABELS=['Not started','Learning','Confident'];
+let mentees=[]; // [{uid, username, levels, caseLevels, updatedAt, stats}]
+let studentSort='least';
+
+// links into the main site, which opens and scrolls to that topic or case study
+const topicHref=code=>'index.html#t'+code.replace('.','-');
+const caseHref=id=>'index.html#case-'+id.replace(/[^a-zA-Z0-9]/g,'-');
+const levelPill=l=>'<span class="lvl-pill lvl-'+l+'">'+LEVEL_LABELS[l]+'</span>';
+
+function studentStats(levels, caseLevels){
+  const cases=caseFlat();
+  const tl=TOPICS.map(t=>levels[t.code]||0), cl=cases.map(c=>caseLevels[c.id]||0);
+  const all=tl.concat(cl);
+  return {
+    topicsConf:tl.filter(l=>l===2).length, topicsLearn:tl.filter(l=>l===1).length,
+    casesConf:cl.filter(l=>l===2).length, casesTotal:cases.length,
+    // share of every topic and case study marked confident / learning — drives the bar and the sort
+    confPct:Math.round(100*all.filter(l=>l===2).length/all.length),
+    learnPct:Math.round(100*all.filter(l=>l===1).length/all.length),
+    score:all.reduce((a,l)=>a+l,0)/(2*all.length)
+  };
+}
+
+function lastActive(ts){
+  if(!ts) return 'Not active yet';
+  const days=Math.floor((Date.now()-ts)/86400000);
+  if(days<=0) return 'Active today';
+  if(days===1) return 'Active yesterday';
+  if(days<14) return 'Active '+days+' days ago';
+  if(days<60) return 'Active '+Math.floor(days/7)+' weeks ago';
+  return 'Active '+new Date(ts).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+}
+
 async function loadMentorDashboard(uid){
   const host=document.getElementById('menteeList');
   host.innerHTML='<p class="mentee-empty">Loading your students&hellip;</p>';
   try{
     const snap=await getDocs(query(collection(db,'users'), where('mentorUid','==',uid)));
-    if(snap.empty){ host.innerHTML='<p class="mentee-empty">No students have picked you yet. Share your username so they can choose you when they sign up.</p>'; return; }
-    const cases=caseFlat();
-    const cards=await Promise.all(snap.docs.map(async d=>{
-      const mentee=d.data();
-      let prog={levels:{},caseLevels:{}};
+    mentees=await Promise.all(snap.docs.map(async d=>{
+      let prog={};
       try{ const ps=await getDoc(doc(db,'progress',d.id)); if(ps.exists()) prog=ps.data(); }catch(e){}
-      const confTopics=TOPICS.filter(t=>(prog.levels&&prog.levels[t.code])===2).length;
-      const confCases=cases.filter(c=>(prog.caseLevels&&prog.caseLevels[c.id])===2).length;
-      // one row per topic — its case studies nest directly under it, so each
-      // topic number appears once instead of being repeated across two lists
-      const topicGroups=TOPICS.map(t=>{
-        const lvl=(prog.levels&&prog.levels[t.code])||0;
-        const topicChip='<span class="chip lvl-'+lvl+'">'+t.code+' &middot; '+esc(t.title)+'</span>';
-        const myCases=cases.filter(c=>c.code===t.code);
-        const subRow=myCases.length ? '<div class="chip-row sub-chip-row">'+myCases.map(c=>{
-          const clvl=(prog.caseLevels&&prog.caseLevels[c.id])||0;
-          return '<span class="chip chip-sub lvl-'+clvl+'">'+c.code+c.letter+' &middot; '+esc(c.t)+(c.src?' — '+esc(c.src):'')+'</span>';
-        }).join('')+'</div>' : '';
-        return '<div class="topic-group">'+topicChip+subRow+'</div>';
-      }).join('');
-      return '<article class="mentee-card">'+
-        '<h4>'+esc(mentee.username)+'</h4>'+
-        '<div class="mentee-stats"><span><b>'+confTopics+'</b> of '+TOPICS.length+' topics confident</span>'+
-        '<span><b>'+confCases+'</b> of '+cases.length+' case studies confident</span></div>'+
-        '<div class="topic-groups">'+topicGroups+'</div>'+
-        '</article>';
+      const levels=prog.levels||{}, caseLevels=prog.caseLevels||{};
+      return {uid:d.id, username:d.data().username, levels, caseLevels, updatedAt:prog.updatedAt||0, stats:studentStats(levels,caseLevels)};
     }));
-    host.innerHTML=cards.join('');
-  }catch(e){ host.innerHTML='<p class="mentee-empty">Could not load students. '+esc(friendlyAuthError(e))+'</p>'; console.warn(e); }
+  }catch(e){
+    mentees=[];
+    host.innerHTML='<p class="mentee-empty">Could not load students. '+esc(friendlyAuthError(e))+'</p>'; console.warn(e);
+    return;
+  }
+  renderStudentList();
+  route();
 }
+
+function sortedMentees(){
+  const by={
+    least:(a,b)=>a.stats.score-b.stats.score,
+    most:(a,b)=>b.stats.score-a.stats.score,
+    name:(a,b)=>a.username.localeCompare(b.username),
+    active:(a,b)=>a.updatedAt-b.updatedAt
+  }[studentSort];
+  return mentees.slice().sort((a,b)=>by(a,b)||a.username.localeCompare(b.username));
+}
+
+// where a group session would help most: started topics with the lowest
+// average level across all students, plus the topics nobody has started yet
+// (listed separately — early in the year that's most of them, and they'd
+// otherwise crowd out the topics students are actually struggling with)
+function weakestTopicsHtml(){
+  const n=mentees.length;
+  const rows=TOPICS.map(t=>{
+    const ls=mentees.map(m=>m.levels[t.code]||0);
+    return {t, avg:ls.reduce((a,l)=>a+l,0)/n, conf:ls.filter(l=>l===2).length, learn:ls.filter(l=>l===1).length};
+  });
+  const untouched=rows.filter(r=>r.avg===0);
+  const weak=rows.filter(r=>r.avg>0 && r.avg<2).sort((a,b)=>a.avg-b.avg).slice(0,5);
+  if(!untouched.length && !weak.length) return '<div class="weak-box"><h3>Weakest topics</h3><p class="mentee-empty">Every student is confident on every topic.</p></div>';
+  return '<div class="weak-box"><h3>Weakest topics across your students</h3>'+
+    (weak.length ? '<ol class="weak-list">'+weak.map(r=>'<li><a href="'+topicHref(r.t.code)+'"><span class="code">'+r.t.code+'</span><span class="weak-title">'+esc(r.t.title)+'</span>'+
+      '<span class="weak-meta">'+r.conf+' of '+n+' confident'+(r.learn?' &middot; '+r.learn+' learning':'')+'</span></a></li>').join('')+'</ol>' : '')+
+    (untouched.length ? '<p class="weak-untouched"><span>Not started by anyone ('+untouched.length+'):</span> '+
+      untouched.map(r=>'<a href="'+topicHref(r.t.code)+'" title="'+esc(r.t.title)+'">'+r.t.code+'</a>').join(' ')+'</p>' : '')+
+    '</div>';
+}
+
+function renderStudentList(){
+  const host=document.getElementById('menteeList');
+  if(!mentees.length){ host.innerHTML='<p class="mentee-empty">No students have picked you yet. Share your username so they can choose you when they sign up.</p>'; return; }
+  host.innerHTML=weakestTopicsHtml()+
+    '<div class="student-toolbar"><span>'+mentees.length+' student'+(mentees.length===1?'':'s')+'</span>'+
+    '<label>Sort by <select id="studentSort">'+
+      [['least','Least progress first'],['most','Most progress first'],['active','Least recently active'],['name','Name']]
+        .map(([v,l])=>'<option value="'+v+'"'+(v===studentSort?' selected':'')+'>'+l+'</option>').join('')+
+    '</select></label></div>'+
+    '<div class="student-list">'+sortedMentees().map(m=>{
+      const s=m.stats;
+      return '<a class="student-row" href="#student/'+encodeURIComponent(m.uid)+'">'+
+        '<span class="sr-name">'+esc(m.username)+'</span>'+
+        '<span class="sr-bar" title="'+s.confPct+'% confident, '+s.learnPct+'% learning"><i class="conf" style="width:'+s.confPct+'%"></i><i class="learn" style="width:'+s.learnPct+'%"></i></span>'+
+        '<span class="sr-stats"><b>'+s.topicsConf+'</b>/'+TOPICS.length+' topics &middot; <b>'+s.casesConf+'</b>/'+s.casesTotal+' case studies confident</span>'+
+        '<span class="sr-active">'+lastActive(m.updatedAt)+'</span>'+
+        '<span class="sr-go" aria-hidden="true">&rarr;</span></a>';
+    }).join('')+'</div>';
+  document.getElementById('studentSort').addEventListener('change',e=>{ studentSort=e.target.value; renderStudentList(); });
+}
+
+function renderStudentDetail(m){
+  const s=m.stats, cases=caseFlat();
+  const themes=[1,2,3].map(th=>'<h4 class="sd-theme">Theme '+th+' &middot; '+THEMES[th]+'</h4><ul class="sd-topics">'+
+    TOPICS.filter(t=>t.theme===th).map(t=>{
+      const myCases=cases.filter(c=>c.code===t.code);
+      return '<li><a class="sd-row" href="'+topicHref(t.code)+'"><span class="code">'+t.code+'</span><span class="sd-title">'+esc(t.title)+'</span>'+levelPill(m.levels[t.code]||0)+'</a>'+
+        (myCases.length ? '<ul class="sd-cases">'+myCases.map(c=>
+          '<li><a class="sd-row sd-case" href="'+caseHref(c.id)+'"><span class="sd-letter">'+c.code+c.letter+'</span>'+
+          '<span class="sd-title">'+esc(c.t)+(c.src?'<span class="sd-src">'+esc(c.src)+'</span>':'')+'</span>'+levelPill(m.caseLevels[c.id]||0)+'</a></li>'
+        ).join('')+'</ul>' : '')+'</li>';
+    }).join('')+'</ul>').join('');
+  const host=document.getElementById('studentDetailView');
+  host.innerHTML='<a class="back-link" href="#">&larr; All students</a>'+
+    '<div class="band-head"><span class="band-num">Student</span><h2>'+esc(m.username)+'</h2></div>'+
+    '<div class="mentee-stats sd-stats"><span><b>'+s.topicsConf+'</b> of '+TOPICS.length+' topics confident'+(s.topicsLearn?', '+s.topicsLearn+' learning':'')+'</span>'+
+    '<span><b>'+s.casesConf+'</b> of '+s.casesTotal+' case studies confident</span><span>'+lastActive(m.updatedAt)+'</span></div>'+
+    '<p class="band-sub">Click any topic or case study to open it on the main site, where you can also change their status.</p>'+
+    themes;
+}
+
+// #student/<uid> shows one student; anything else shows the list — so the
+// browser's back button returns from a student to the list
+function route(){
+  const m=location.hash.match(/^#student\/(.+)$/);
+  const st=m && mentees.find(x=>x.uid===decodeURIComponent(m[1]));
+  document.getElementById('studentListView').hidden=!!st;
+  document.getElementById('studentDetailView').hidden=!st;
+  // one student at a time gets the whole page; the admin table returns with the list
+  if(currentUser && currentUser.isAdmin) document.getElementById('adminSection').hidden=!!st;
+  if(st){ renderStudentDetail(st); window.scrollTo(0,0); }
+}
+window.addEventListener('hashchange',route);
 
 /* ==================== admin panel ==================== */
 async function loadAdminPanel(){
@@ -144,9 +253,21 @@ async function loadAdminPanel(){
       mentors.map(m=>'<option value="'+m.uid+'"'+(m.uid===currentUid?' selected':'')+'>'+esc(m.username)+' ('+esc(m.role)+')</option>').join('');
   }
 
+  // waiting-for-approval accounts first, then mentors/teachers, then students
+  const isPending=u=>isStaffRole(u.role) && !u.mentorApproved && !u.isAdmin;
+  const rank=u=>isPending(u)?0:isStaffRole(u.role)?1:2;
+  all.sort((a,b)=>rank(a)-rank(b) || String(a.username).localeCompare(String(b.username)));
+  const nPending=all.filter(isPending).length;
+  const banner=document.getElementById('pendingBanner');
+  banner.hidden=!nPending;
+  banner.textContent=nPending===1
+    ? '1 mentor or teacher is waiting for approval — they\'re at the top of the table. Tick Approved to unlock their tools.'
+    : nPending+' mentors or teachers are waiting for approval — they\'re at the top of the table. Tick Approved to unlock their tools.';
+
   tbody.innerHTML = all.map(u=>{
     const isMentee=u.role==='mentee';
     const isStaff=isStaffRole(u.role);
+    const note=rowNote && rowNote.uid===u.uid ? rowNote : null;
     const mentorCell = isMentee
       ? '<select data-mentor-uid="'+u.uid+'">'+mentorOptsFor(u.mentorUid)+'</select>'
       : '<span class="muted-cell">—</span>';
@@ -156,7 +277,9 @@ async function loadAdminPanel(){
     const adminCell = isStaff
       ? '<label class="admin-flag"><input type="checkbox" data-admin-uid="'+u.uid+'"'+(u.isAdmin?' checked':'')+'> Admin</label>'
       : '<span class="muted-cell">—</span>';
-    return '<tr data-row-uid="'+u.uid+'"><td>'+esc(u.username)+(u.uid===currentUser.uid?' <span class="muted-cell">(you)</span>':'')+'</td>'+
+    return '<tr data-row-uid="'+u.uid+'"'+(isPending(u)?' class="pending-row"':'')+'><td>'+esc(u.username)+(u.uid===currentUser.uid?' <span class="muted-cell">(you)</span>':'')+
+        (isPending(u)?'<span class="pending-tag">Waiting for approval</span>':'')+
+        '<div class="row-msg'+(note?(note.ok?' ok':' err'):'')+'" data-msg-uid="'+u.uid+'" role="status">'+(note?esc(note.text):'')+'</div></td>'+
       '<td><select data-role-uid="'+u.uid+'"><option value="mentee"'+(isMentee?' selected':'')+'>Student</option><option value="mentor"'+(u.role==='mentor'?' selected':'')+'>Mentor</option><option value="teacher"'+(u.role==='teacher'?' selected':'')+'>Teacher</option></select></td>'+
       '<td>'+approvedCell+'</td>'+
       '<td>'+mentorCell+'</td>'+
@@ -166,32 +289,58 @@ async function loadAdminPanel(){
 
   tbody.querySelectorAll('[data-role-uid]').forEach(sel=>sel.addEventListener('change', async ()=>{
     const uid=sel.dataset.roleUid, role=sel.value;
+    const u=all.find(x=>x.uid===uid), prev=u.role;
+    const wasStaff=isStaffRole(prev), nowStaff=isStaffRole(role);
+    const linked=all.filter(x=>x.role==='mentee' && x.mentorUid===uid);
     msg.textContent='';
+    // spell out what the change does before it happens — one misclick here
+    // used to demote a mentor instantly and leave their students pointing at them
+    const lines=['Change '+u.username+' from '+roleLabel(prev)+' to '+roleLabel(role)+'?'];
+    if(wasStaff && !nowStaff){
+      lines.push('They lose access to this dashboard and the mentor tools.');
+      if(linked.length) lines.push('Their '+linked.length+' student'+(linked.length===1?'':'s')+' ('+linked.map(x=>x.username).join(', ')+') will be set to "no mentor" — reassign them afterwards if needed.');
+      if(uid===currentUser.uid) lines.push('This is your own account.');
+    }
+    if(!wasStaff && nowStaff){
+      lines.push('Their own mentor link is cleared.');
+      if(!(u.mentorApproved||u.isAdmin)) lines.push('They stay unapproved until you tick Approved.');
+    }
+    if(!confirm(lines.join('\n\n'))){ sel.value=prev; return; }
     try{
       const patch={role};
-      if(isStaffRole(role)) patch.mentorUid=null; // a mentor/teacher doesn't have a mentor of their own
+      if(nowStaff) patch.mentorUid=null; // a mentor/teacher doesn't have a mentor of their own
       await setDoc(doc(db,'users',uid), patch, {merge:true});
+      let unlinked=0;
+      if(wasStaff && !nowStaff){
+        await Promise.all(linked.map(x=>setDoc(doc(db,'users',x.uid), {mentorUid:null}, {merge:true})));
+        unlinked=linked.length;
+      }
+      setRowNote(uid,'Now a '+roleLabel(role)+'.'+(unlinked?' '+unlinked+' student'+(unlinked===1?'':'s')+' set to "no mentor".':''),true);
       loadAdminPanel();
-    }catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); }
+    }catch(e){ sel.value=prev; setRowNote(uid,'Not changed: '+friendlyAuthError(e),false); loadAdminPanel(); }
   }));
   tbody.querySelectorAll('[data-mentor-uid]').forEach(sel=>sel.addEventListener('change', async ()=>{
     const uid=sel.dataset.mentorUid;
     msg.textContent='';
-    try{ await setDoc(doc(db,'users',uid), {mentorUid: sel.value||null}, {merge:true}); msg.style.color='var(--current)'; msg.textContent='Saved.'; }
-    catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); }
+    try{ await setDoc(doc(db,'users',uid), {mentorUid: sel.value||null}, {merge:true}); setRowNote(uid,'Mentor saved.',true); }
+    catch(e){ setRowNote(uid,'Not saved: '+friendlyAuthError(e),false); }
   }));
   tbody.querySelectorAll('[data-approved-uid]').forEach(cb=>cb.addEventListener('change', async ()=>{
     const uid=cb.dataset.approvedUid;
     msg.textContent='';
-    try{ await setDoc(doc(db,'users',uid), {mentorApproved: cb.checked}, {merge:true}); loadAdminPanel(); }
-    catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); cb.checked=!cb.checked; }
+    try{
+      await setDoc(doc(db,'users',uid), {mentorApproved: cb.checked}, {merge:true});
+      setRowNote(uid, cb.checked ? 'Approved — mentor tools unlocked.' : 'Approval removed.', true);
+      loadAdminPanel();
+    }catch(e){ cb.checked=!cb.checked; setRowNote(uid,'Not saved: '+friendlyAuthError(e),false); }
   }));
   tbody.querySelectorAll('[data-admin-uid]').forEach(cb=>cb.addEventListener('change', async ()=>{
     const uid=cb.dataset.adminUid;
     msg.textContent='';
     try{ await setDoc(doc(db,'users',uid), {isAdmin: cb.checked}, {merge:true});
       if(uid===currentUser.uid){ currentUser.isAdmin=cb.checked; }
-    }catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); cb.checked=!cb.checked; }
+      setRowNote(uid, cb.checked ? 'Now an admin.' : 'No longer an admin.', true);
+    }catch(e){ cb.checked=!cb.checked; setRowNote(uid,'Not saved: '+friendlyAuthError(e),false); }
   }));
   tbody.querySelectorAll('[data-remove-uid]').forEach(btn=>btn.addEventListener('click', async ()=>{
     const uid=btn.dataset.removeUid, name=btn.dataset.removeName;
@@ -200,9 +349,21 @@ async function loadAdminPanel(){
     try{
       await deleteDoc(doc(db,'users',uid));
       try{ await deleteDoc(doc(db,'progress',uid)); }catch(e){}
+      // the row is gone, so this one goes in the message above the table
+      msg.style.color='var(--current)'; msg.textContent='Removed '+name+'.';
       loadAdminPanel();
-    }catch(e){ msg.style.color='var(--lava)'; msg.textContent=friendlyAuthError(e); }
+    }catch(e){ setRowNote(uid,'Not removed: '+friendlyAuthError(e),false); }
   }));
+}
+
+// feedback shown inside the row that was changed, not under the table. Kept
+// in rowNote so it survives the table re-render most changes trigger.
+let rowNote=null;
+function setRowNote(uid,text,ok){
+  rowNote={uid,text,ok};
+  document.querySelectorAll('#adminTable .row-msg').forEach(m=>{ m.textContent=''; m.className='row-msg'; });
+  const m=document.querySelector('#adminTable .row-msg[data-msg-uid="'+uid+'"]');
+  if(m){ m.textContent=text; m.className='row-msg '+(ok?'ok':'err'); }
 }
 
 /* ==================== mentor invite code ==================== */
@@ -231,10 +392,10 @@ document.getElementById('inviteForm').addEventListener('submit', async e=>{
 /* ==================== auth state ==================== */
 if(fbReady){
   onAuthStateChanged(auth, async user=>{
-    if(!user){ currentUser=null; showGate('Log in first', "You need to be logged in as a mentor, teacher or admin to see this page."); return; }
+    if(!user){ currentUser=null; showGate('Log in first', "You need to be logged in as a mentor, teacher or admin to see this page.", true); return; }
     try{
       const uSnap=await getDoc(doc(db,'users',user.uid));
-      if(!uSnap.exists()){ currentUser=null; showGate('Log in first', "You need to be logged in as a mentor, teacher or admin to see this page."); return; }
+      if(!uSnap.exists()){ currentUser=null; showGate('Log in first', "You need to be logged in as a mentor, teacher or admin to see this page.", true); return; }
       const u=uSnap.data();
       currentUser={uid:user.uid, username:u.username, role:u.role, isAdmin:u.isAdmin===true, mentorApproved:u.mentorApproved===true};
       const isApprovedMentor=isStaffRole(currentUser.role) && (currentUser.mentorApproved || currentUser.isAdmin);
