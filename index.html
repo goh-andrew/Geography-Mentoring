@@ -44,7 +44,7 @@
       <button type="button" id="trackMenteeBtn" data-set-track="mentee" aria-pressed="true">I'm a student</button>
       <button type="button" id="trackMentorBtn" data-set-track="mentor" aria-pressed="false">I'm a mentor</button>
     </div>
-    <p class="hero-note" id="heroMentorNote" hidden>Your students' progress is on the <a href="dashboard.html">dashboard</a>.</p>
+    <p class="hero-note" id="heroMentorNote" hidden>Click a student's name under the chart to see or change their progress on the <a href="dashboard.html">dashboard</a>.</p>
 
     <section class="transect" aria-labelledby="transect-h">
       <div class="transect-head">
@@ -62,6 +62,7 @@
         </span>
         <span>Click a topic code to open it.</span>
       </div>
+      <div class="mentee-legend" id="menteeLegend" hidden></div>
     </section>
   </div>
 </header>
@@ -749,14 +750,84 @@ function drawChart(s, items, opts){
   });
 }
 
+// a mentor's hero chart: one line per student, read-only (editing is on the dashboard)
+const MENTEE_COLORS=['#48B7A6','#C98A2E','#7C9CFF','#E0607E','#8BD17C','#F2B84B','#5EC8E8','#D98CD9'];
+let mentorMentees=null; // null = not loaded yet; [{uid, username, levels}]
+function drawMenteesChart(){
+  const s=document.getElementById('profile');
+  s.textContent='';
+  const L=100,R=940,base=176, n=TOPICS.length, step=(R-L)/(n-1);
+  Y.forEach((y,i)=>{
+    s.appendChild(svg('line',{x1:L-12,y1:y,x2:R+8,y2:y,class:'grid-line'}));
+    const lab=svg('text',{x:0,y:y+3,class:'axis-label'});
+    lab.textContent=Y_LABELS[i];
+    s.appendChild(lab);
+  });
+  const list=mentorMentees||[];
+  if(mentorMentees && !list.length){
+    const msg=svg('text',{x:L,y:100,class:'axis-label'});
+    msg.textContent='No students yet. Once a student picks you, their progress shows here.';
+    s.appendChild(msg);
+  }
+  list.forEach((m,mi)=>{
+    const color=MENTEE_COLORS[mi%MENTEE_COLORS.length];
+    const pts=TOPICS.map((t,i)=>[+(L+i*step).toFixed(1),Y[m.levels[t.code]||0]]);
+    s.appendChild(svg('path',{d:smoothPath(pts),fill:'none',stroke:color,'stroke-width':'2.5','stroke-linejoin':'round','stroke-linecap':'round',opacity:'0.92'}));
+    pts.forEach(([x,y])=>s.appendChild(svg('circle',{cx:x,cy:y,r:3.5,fill:color,stroke:'#0A1F2B','stroke-width':'1.5'})));
+  });
+  TOPICS.forEach((t,i)=>{
+    const x=+(L+i*step).toFixed(1);
+    const conf=list.filter(m=>(m.levels[t.code]||0)===2).length;
+    const g=svg('g',{class:'station',tabindex:'0',role:'link'});
+    g.appendChild(svg('rect',{x:x-14,y:20,width:28,height:180,class:'station-hit'}));
+    const lab=svg('text',{x:x,y:base+18,'text-anchor':'middle',class:'st-label'+(conf?' on':'')});
+    lab.textContent=t.code;
+    g.appendChild(lab);
+    const title=svg('title');
+    title.textContent=t.code+' '+t.title+(list.length?' ('+conf+' of '+list.length+' confident)':'');
+    g.appendChild(title);
+    const go=()=>openTopic(t.code);
+    g.addEventListener('click',go);
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+    s.appendChild(g);
+  });
+  const legend=document.getElementById('menteeLegend');
+  legend.hidden=!list.length;
+  legend.innerHTML=list.map((m,i)=>{
+    const conf=TOPICS.filter(t=>(m.levels[t.code]||0)===2).length;
+    return '<a class="m" href="dashboard.html#student/'+encodeURIComponent(m.uid)+'"><i class="sw" style="background:'+MENTEE_COLORS[i%MENTEE_COLORS.length]+'"></i><b>'+esc(m.username)+'</b> '+conf+'/'+TOPICS.length+' confident</a>';
+  }).join('');
+  document.getElementById('transect-h').textContent="Your students' progress";
+  document.getElementById('transect-count').textContent=!mentorMentees ? 'Loading…' : list.length ? list.length+' student'+(list.length===1?'':'s') : 'No students yet';
+}
+
+// read-only snapshot of each linked student's topic levels for the hero chart
+async function loadMentorMentees(uid, seq){
+  let list=[];
+  try{
+    const snap=await getDocs(query(collection(db,'users'), where('mentorUid','==',uid)));
+    list=await Promise.all(snap.docs.map(async d=>{
+      let levels={};
+      try{ const ps=await getDoc(doc(db,'progress',d.id)); if(ps.exists()) levels=ps.data().levels||{}; }catch(e){}
+      return {uid:d.id, username:d.data().username||'(no name)', levels};
+    }));
+    list.sort((a,b)=>a.username.localeCompare(b.username));
+  }catch(e){ console.warn("could not load students for the hero chart", e); }
+  if(seq!==authSeq) return;
+  mentorMentees=list;
+  drawProfile();
+}
+
 let mentorViewShown=false;
 function drawProfile(){
   refreshProgressMarks();
   const isMentor=isFunctionalMentor(currentUser);
   mentorViewShown=isMentor;
-  document.querySelector('.hero .transect').hidden=isMentor;
   document.getElementById('heroMentorNote').hidden=!isMentor;
-  if(isMentor) return;
+  document.getElementById('topicKeyGroup').hidden=isMentor;
+  if(isMentor){ drawMenteesChart(); return; }
+  document.getElementById('menteeLegend').hidden=true;
+  document.getElementById('transect-h').textContent='Your progress';
   drawChart(document.getElementById('profile'),
     TOPICS.map(t=>({level:state.levels[t.code]||0, label:t.code, title:t.code+' '+t.title, go:()=>openTopic(t.code)})),
     {gridClass:'grid-line',axisClass:'axis-label',lineClass:'profile-line',gradId:'hyps',fillOpacity:'0.85',hitW:28,dotR:4.5,dotFill:'#0A1F2B',dotStroke:'#F3F7F5'});
@@ -1320,6 +1391,7 @@ function setLoggedOutUI(){
   document.getElementById('trackMentorBtn').hidden=false;
   document.getElementById('trackMenteeBtn').textContent="I'm a student";
   setTrack('mentee');
+  mentorMentees=null;
   // a mentor just logged out: bring back the student controls and charts
   if(mentorViewShown) refreshAll();
 }
@@ -1430,6 +1502,7 @@ async function handleAuthUser(user){
         refreshAll();
       }else if(currentUser.role==='mentor' || currentUser.role==='teacher'){
         refreshAll(); // mentor view: notes and guidance only, no progress controls
+        if(isFunctionalMentor(currentUser)) loadMentorMentees(user.uid, seq);
       }
     }catch(e){ console.warn('auth state handling failed', e); }
 }

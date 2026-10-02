@@ -35,7 +35,7 @@
   <section class="band" id="menteesSection" hidden>
     <div id="studentListView">
       <div class="band-head"><span class="band-num">Mentoring</span><h2>My students</h2></div>
-      <p class="band-sub">Progress synced from each student's own device the last time they had it open. Click a student to see everything they've marked.</p>
+      <p class="band-sub">Progress as saved to each student's account, whether they marked it or you did. "Active" is the last time the student saved a change themselves. Click a student to see or change everything they've marked.</p>
       <div id="menteeList"></div>
     </div>
     <div id="studentDetailView" hidden></div>
@@ -171,13 +171,24 @@ function weakestTopicsHtml(){
     return {t, avg:ls.reduce((a,l)=>a+l,0)/n, conf:ls.filter(l=>l===2).length, learn:ls.filter(l=>l===1).length};
   });
   const untouched=rows.filter(r=>r.avg===0);
-  const weak=rows.filter(r=>r.avg>0 && r.avg<2).sort((a,b)=>a.avg-b.avg).slice(0,5);
-  if(!untouched.length && !weak.length) return '<div class="weak-box"><h3>Weakest topics</h3><p class="mentee-empty">Every student is confident on every topic.</p></div>';
+  const meta=r=>r.conf+' of '+n+' confident'+(r.learn?' &middot; '+r.learn+' learning':'');
+  const chips=(label,rs)=>'<p class="weak-untouched"><span>'+label+' ('+rs.length+'):</span> '+
+    rs.map(r=>'<a href="'+topicHref(r.t.code)+'" title="'+esc(r.t.title)+'">'+r.t.code+'</a>').join(' ')+'</p>';
+  // lowest average first; equal averages put the topic fewer students are confident on first
+  const started=rows.filter(r=>r.avg>0 && r.avg<2).sort((a,b)=>a.avg-b.avg||a.conf-b.conf);
+  // topics with identical counts are equally weak, so a tie that crosses the
+  // five-topic cut-off is shown whole as one line instead of picking five at random
+  let weak=started.slice(0,5), tied=[];
+  if(started.length>5){
+    const last=started[4], same=r=>r.conf===last.conf && r.learn===last.learn;
+    if(same(started[5])){ weak=started.filter(r=>r.avg<last.avg||(r.avg===last.avg&&r.conf<last.conf)); tied=started.filter(same); }
+  }
+  if(!untouched.length && !started.length) return '<div class="weak-box"><h3>Weakest topics</h3><p class="mentee-empty">Every student is confident on every topic.</p></div>';
   return '<div class="weak-box"><h3>Weakest topics across your students</h3>'+
     (weak.length ? '<ol class="weak-list">'+weak.map(r=>'<li><a href="'+topicHref(r.t.code)+'"><span class="code">'+r.t.code+'</span><span class="weak-title">'+esc(r.t.title)+'</span>'+
-      '<span class="weak-meta">'+r.conf+' of '+n+' confident'+(r.learn?' &middot; '+r.learn+' learning':'')+'</span></a></li>').join('')+'</ol>' : '')+
-    (untouched.length ? '<p class="weak-untouched"><span>Not started by anyone ('+untouched.length+'):</span> '+
-      untouched.map(r=>'<a href="'+topicHref(r.t.code)+'" title="'+esc(r.t.title)+'">'+r.t.code+'</a>').join(' ')+'</p>' : '')+
+      '<span class="weak-meta">'+meta(r)+'</span></a></li>').join('')+'</ol>' : '')+
+    (tied.length ? chips(meta(tied[0]),tied) : '')+
+    (untouched.length ? chips('Not started by anyone',untouched) : '')+
     '</div>';
 }
 
