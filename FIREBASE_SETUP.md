@@ -46,27 +46,47 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
 
+    // lowercase letters, numbers, dots, dashes and underscores, up to 40 long
+    function validUsername(name) {
+      return name is string && name.matches('^[a-z0-9_.-]{1,40}$');
+    }
+
     match /users/{uid} {
-      allow read: if true;
+      // Signed-out visitors (the sign-up form) can only see mentor and teacher
+      // profiles. A student's profile is visible to the student, their own
+      // mentor or teacher, and admins.
+      allow read: if resource.data.role in ['mentor', 'teacher'] ||
+        isSelf(uid) || isAdmin() ||
+        (request.auth != null && resource.data.mentorUid == request.auth.uid);
       allow create: if isSelf(uid) &&
+        validUsername(request.resource.data.username) &&
         (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == false) &&
+        !('mentorInviteCodeUsed' in request.resource.data) &&
         (
           request.resource.data.role == 'mentee' ||
           (
             request.resource.data.role in ['mentor', 'teacher'] &&
             (!('mentorApproved' in request.resource.data) || request.resource.data.mentorApproved == false) &&
-            request.resource.data.mentorInviteCodeUsed ==
-              get(/databases/$(database)/documents/config/mentorInvite).data.code
+            exists(/databases/$(database)/documents/inviteClaims/$(uid))
           )
         );
       allow update: if isAdmin() ||
         (isSelf(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['mentorUid'])) ||
         (isSelf(uid) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['username']) &&
-          request.resource.data.username is string &&
-          request.resource.data.username.size() > 0 &&
-          request.resource.data.username.size() <= 40);
+          validUsername(request.resource.data.username));
       allow delete: if isAdmin();
+    }
+
+    // Proof that someone typed the right invite code when signing up as a
+    // mentor or teacher. It can only be created with the correct code, and
+    // only admins can read it, so the code never sits on a public profile.
+    match /inviteClaims/{uid} {
+      allow create: if isSelf(uid) &&
+        request.resource.data.keys().hasOnly(['code']) &&
+        request.resource.data.code ==
+          get(/databases/$(database)/documents/config/mentorInvite).data.code;
+      allow read, delete: if isAdmin();
     }
 
     // only admins can read/write config docs (e.g. the mentor invite code)
@@ -94,12 +114,15 @@ service cloud.firestore {
 
 Click **Publish**. In plain terms: anyone, even signed out (the sign-up form
 needs to show the mentor/teacher list *before* someone has an account), can
-see the (non-secret) list of usernames and roles; a normal
+see mentor and teacher profiles, but not students'; a student's profile is
+visible only to them, their own mentor or teacher, and admins. A normal
 person can create their own profile and change only their own mentor/teacher
-choice and their own username; signing up
-as a **mentor** or **teacher** additionally requires knowing the invite code
-from step 4a below, and even then the new account starts unapproved until an
-admin confirms it (see step 7); an **admin** (see step 7) can edit or delete
+choice and their own username (letters, numbers, dots, dashes and underscores
+only). Signing up as a **mentor** or **teacher** additionally requires the
+invite code from step 4a below. The code is checked through a private
+`inviteClaims` record that only admins can read, so it never appears on a
+profile, and even then the new account starts unapproved until an admin
+confirms it (see step 7). An **admin** (see step 7) can edit or delete
 *anyone's* profile (role, mentor assignment, admin status, approval) and
 read or delete anyone's progress; and an approved mentor or teacher can *read
 and write* the progress of any student whose profile names them as the mentor.
@@ -111,6 +134,15 @@ the student's page on the dashboard, for example during a session together.
 > point (working through a topic with a student, you can mark it there and
 > then), but it's a real shift from "only I can touch my own data," worth
 > being aware of if that ever matters for how you present this to students.
+
+> **Updating from an earlier version of these rules?** Publish this version
+> at the same time as you deploy the matching site code. The old rules expect
+> the invite code on the profile and the new site no longer sends it (and the
+> other way round), so mixing them breaks mentor and teacher sign-up. Older
+> mentor and teacher profiles may still have a `mentorInviteCodeUsed` field;
+> it's removed automatically the next time an admin opens **Manage
+> everyone**, or you can delete it by hand in the Firestore **Data** tab. If
+> that code was ever exposed, it's worth changing it too (step 4a).
 
 > If you already published an earlier version of these rules and are seeing
 > a **"Could not load..."** / `permission-denied` error on the sign-up

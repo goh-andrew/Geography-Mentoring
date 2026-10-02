@@ -461,7 +461,8 @@ function renderSaveStatus(){
 }
 
 /* ---------------- helpers ---------------- */
-const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+// escapes quotes too, so it's safe inside attribute values as well as text
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const el=(t,c,h)=>{const n=document.createElement(t); if(c)n.className=c; if(h!==undefined)n.innerHTML=h; return n;};
 
 /* nested list from flat depth items */
@@ -927,25 +928,39 @@ function buildSearchIndex(){
    ['fieldwork','Fieldwork','Paper 4 fieldwork techniques'],
    ['commands','Command words','What each command word asks for']].forEach(([id,title,text])=>
     items.push({type:'Section', title, sub:'', text, go:()=>document.getElementById(id).scrollIntoView({block:'start'})}));
-  items.forEach(it=>{ it.hay=(it.title+' '+it.sub+' '+it.text).toLowerCase(); it.titleL=it.title.toLowerCase(); });
+  items.forEach(it=>{ it.hay=fold(it.title+' '+it.sub+' '+it.text); it.titleL=fold(it.title); it.subL=fold(it.sub); });
   return items;
 }
 
 const escRe=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-// each search word has to match the start of a word, so "ice" finds "ice
-// sheet" but not "service"
-const wordStart=w=>new RegExp('(?<![a-z0-9])'+escRe(w),'i');
+// Text is compared "folded": lowercase, accents removed (so "jokull" finds
+// Eyjafjallajökull) and hyphens and slashes treated as spaces (so "one-child"
+// finds "one child"). Folding keeps the length the same, so a match position
+// in the folded text is also the right position in the original.
+const fold=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[-\u2010-\u2014\/]/g,' ').toLowerCase();
+// words too common to narrow anything down
+const STOP=new Set('a an the of and or in on to for is are be by at as it its with from what how why which'.split(' '));
+// the useful words in a search: punctuation trimmed (dots inside "2.3" kept), filler words dropped
+function queryWords(q){
+  return fold(q).split(/\s+/).map(w=>w.replace(/^[^a-z0-9]+|[^a-z0-9]+$/g,'')).filter(w=>w && !STOP.has(w));
+}
+// a search word normally has to match the start of a word, so "ice" finds
+// "ice sheet" but not "service". Words of 5+ letters may also match inside a
+// longer word ("jokull" in Eyjafjallajokull), ranked lower.
+const MIDWORD_MIN=5;
+const wordStart=w=>new RegExp('(?<![a-z0-9])'+escRe(w));
+const wordAnywhere=w=>new RegExp(w.length>=MIDWORD_MIN ? escRe(w) : '(?<![a-z0-9])'+escRe(w));
 function searchFor(q){
-  const words=q.toLowerCase().split(/\s+/).filter(Boolean);
+  const words=queryWords(q);
   if(!words.length) return [];
   searchIndex=searchIndex||buildSearchIndex();
-  const res=words.map(wordStart);
+  const res=words.map(w=>({start:wordStart(w), any:wordAnywhere(w)}));
   const typeBoost={'Topic':3,'Case study':2,'Case study notes':1};
   return searchIndex.map(it=>{
     let score=0;
-    for(const re of res){
-      if(!re.test(it.hay)) return null; // every word has to appear somewhere
-      score+=re.test(it.titleL) ? 10 : re.test(it.sub) ? 4 : 1;
+    for(const {start,any} of res){
+      if(!any.test(it.hay)) return null; // every word has to appear somewhere
+      score+=start.test(it.titleL) ? 10 : any.test(it.titleL) ? 6 : start.test(it.subL) ? 4 : start.test(it.hay) ? 1 : 0.5;
     }
     if(it.code && it.code===q.trim()) score+=30; // typing "2.3" puts topic 2.3 first
     return {it, score:score+(typeBoost[it.type]||0)};
@@ -955,11 +970,12 @@ function searchFor(q){
 // text with the search words wrapped in <mark>, matched in one pass over the
 // raw text so a word can't match inside an earlier <mark> or an &amp;
 function markWords(text, words){
-  const re=new RegExp('(?<![a-z0-9])(?:'+words.map(escRe).join('|')+')','ig');
+  const re=new RegExp(words.map(w=>wordAnywhere(w).source).join('|'),'g');
+  const folded=fold(text);
   let out='', last=0, m;
-  while((m=re.exec(text))){
+  while((m=re.exec(folded))){
     if(!m[0]){ re.lastIndex++; continue; }
-    out+=esc(text.slice(last,m.index))+'<mark>'+esc(m[0])+'</mark>';
+    out+=esc(text.slice(last,m.index))+'<mark>'+esc(text.slice(m.index,m.index+m[0].length))+'</mark>';
     last=m.index+m[0].length;
   }
   return out+esc(text.slice(last));
@@ -967,7 +983,8 @@ function markWords(text, words){
 // a short extract around the first matching word in the body text
 function snippet(text, words){
   if(!text) return '';
-  const at=Math.min(...words.map(w=>{ const i=text.search(wordStart(w)); return i<0?Infinity:i; }));
+  const folded=fold(text);
+  const at=Math.min(...words.map(w=>{ const i=folded.search(wordAnywhere(w)); return i<0?Infinity:i; }));
   if(at===Infinity) return '';
   const start=Math.max(0,at-50), end=Math.min(text.length,at+110);
   return (start>0?'…':'')+text.slice(start,end).trim()+(end<text.length?'…':'');
@@ -980,12 +997,13 @@ let searchHits=[], searchActive=0, searchReturnFocus=null;
 
 function renderSearch(){
   const q=searchInput.value.trim();
-  const words=q.toLowerCase().split(/\s+/).filter(Boolean);
+  const words=queryWords(q);
   searchHits=searchFor(q); searchActive=0;
+  if(q && !words.length){ searchResults.innerHTML='<p class="search-empty">Try a more specific word.</p>'; searchInput.removeAttribute('aria-activedescendant'); return; }
   if(!q){ searchResults.innerHTML='<p class="search-empty">Try a topic number like 2.3, a place like Bangladesh, or a word like "longshore".</p>'; searchInput.removeAttribute('aria-activedescendant'); return; }
   if(!searchHits.length){ searchResults.innerHTML='<p class="search-empty">Nothing found for "'+esc(q)+'".</p>'; searchInput.removeAttribute('aria-activedescendant'); return; }
   searchResults.innerHTML=searchHits.map((it,i)=>{
-    const snip=wordStart(words[0]).test(it.titleL) ? '' : snippet(it.text,words);
+    const snip=wordAnywhere(words[0]).test(it.titleL) ? '' : snippet(it.text,words);
     return '<button type="button" class="srch-item" role="option" id="srch-'+i+'" data-i="'+i+'">'+
       '<span class="srch-type">'+esc(it.type)+'</span>'+
       '<span class="srch-title">'+markWords(it.title,words)+'</span>'+
@@ -1108,10 +1126,12 @@ async function loadMentorOptions(sel){
   sel.innerHTML='<option value="">Loading&hellip;</option>';
   if(!fbReady){ sel.innerHTML='<option value="">Accounts not set up yet</option>'; return; }
   try{
-    // mentors and teachers are the same feature set, so a student can be assigned to either
-    const snap=await getDocs(query(collection(db,'users'), where('role','in',['mentor','teacher'])));
+    // mentors and teachers are the same feature set, so a student can be assigned to either.
+    // Two simple queries rather than one "in" query, so the security rule that
+    // only lets signed-out visitors see mentor and teacher profiles can approve each.
+    const snaps=await Promise.all(['mentor','teacher'].map(r=>getDocs(query(collection(db,'users'), where('role','==',r)))));
     // only approved ones are choosable; a pending signup isn't active yet
-    const approved=snap.docs.filter(d=>{ const u=d.data(); return u.mentorApproved===true || u.isAdmin===true; });
+    const approved=snaps.flatMap(s=>s.docs).filter(d=>{ const u=d.data(); return u.mentorApproved===true || u.isAdmin===true; });
     sel.innerHTML='<option value="">Choose your mentor or teacher&hellip;</option>'+SELF_STUDY_OPTION+
       approved.map(d=>{ const u=d.data(); return '<option value="'+d.id+'">'+esc(u.username)+' ('+esc(u.role)+')</option>'; }).join('');
   }catch(e){
@@ -1132,6 +1152,7 @@ document.getElementById('signupForm').addEventListener('submit', async e=>{
   const mentorUid=mentorChoice===SELF_STUDY ? null : mentorChoice;
   const inviteCode=document.getElementById('suInviteCode').value.trim();
   if(!username){ errEl.textContent='Enter a username.'; return; }
+  if(username.length>40){ errEl.textContent='Usernames can be up to 40 characters.'; return; }
   if(role==='mentee' && !mentorChoice){ errEl.textContent='Choose your mentor or teacher, or "studying on my own".'; return; }
   if((role==='mentor'||role==='teacher') && !inviteCode){ errEl.textContent='Enter the invite code.'; return; }
   if(!fbReady){ errEl.textContent=friendlyAuthError(); return; }
@@ -1139,14 +1160,23 @@ document.getElementById('signupForm').addEventListener('submit', async e=>{
   try{
     cred=await createUserWithEmailAndPassword(auth, usernameToEmail(username), password);
     const uid=cred.user.uid;
+    if(role!=='mentee'){
+      // the invite code goes in a private record that only admins can read; the
+      // security rule only allows it with the right code, and a mentor/teacher
+      // profile can only be created once it exists. It's never on the public profile.
+      await setDoc(doc(db,'inviteClaims',uid), {code:inviteCode});
+    }
     const userDoc = role==='mentee'
       ? {username, role, mentorUid}
-      : {username, role, mentorApproved:false, mentorInviteCodeUsed:inviteCode};
+      : {username, role, mentorApproved:false};
     await setDoc(doc(db,'users',uid), userDoc);
     if(role==='mentee'){
       await setDoc(doc(db,'progress',uid), {levels:state.levels||{},cases:state.cases||{},caseLevels:state.caseLevels||{},username,updatedAt:Date.now()});
       state.owner=uid; saveLocal(); // what's on this device is now that account's copy
     }
+    // Firebase announced the new login before the profile above existed, so the
+    // page saw "no profile" and stayed logged out. Now that it exists, load it.
+    await handleAuthUser(cred.user);
     closeModal(authBackdrop);
     document.getElementById('signupForm').reset();
     if(role==='mentor'||role==='teacher'){
@@ -1340,9 +1370,15 @@ function guestGains(cloud){
 }
 
 /* ==================== auth state ==================== */
-if(fbReady){
-  onAuthStateChanged(auth, async user=>{
+// Runs on every login/logout, and again from sign-up once the new profile has
+// been saved. Each run gets a number, and a run that's been overtaken by a
+// newer one stops after its next await, so an older "no profile yet" result
+// can't land last and overwrite the logged-in view.
+let authSeq=0;
+async function handleAuthUser(user){
+    const seq=++authSeq;
     await ready; // local progress must be loaded before deciding what to keep
+    if(seq!==authSeq) return;
     if(!user){
       currentUser=null; resetCloudSync();
       if(state.owner==='legacy'){ state.owner=null; saveLocal(); }
@@ -1358,12 +1394,14 @@ if(fbReady){
     if(loginReturn==='dashboard'){ location.replace('dashboard.html'); return; } // already logged in
     try{
       const uSnap=await getDoc(doc(db,'users',user.uid));
+      if(seq!==authSeq) return;
       if(!uSnap.exists()){ currentUser=null; setLoggedOutUI(); return; }
       const u=uSnap.data();
       currentUser={uid:user.uid, username:u.username, role:u.role, mentorUid:u.mentorUid||null, isAdmin:u.isAdmin===true, mentorApproved:u.mentorApproved===true};
       setLoggedInUI(currentUser);
       if(currentUser.role==='mentee'){
         const pSnap=await getDoc(doc(db,'progress',user.uid));
+        if(seq!==authSeq) return;
         if(pSnap.exists()){
           const p=pSnap.data();
           const cloud={levels:p.levels||{}, cases:p.cases||{}, caseLevels:p.caseLevels||{}};
@@ -1396,7 +1434,9 @@ if(fbReady){
         refreshAll(); // mentor view: notes and guidance only, no progress controls
       }
     }catch(e){ console.warn('auth state handling failed', e); }
-  });
+}
+if(fbReady){
+  onAuthStateChanged(auth, handleAuthUser);
 }else{
   setLoggedOutUI();
 }

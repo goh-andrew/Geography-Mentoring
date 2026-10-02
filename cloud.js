@@ -49,4 +49,5 @@ export function friendlyAuthError(e){
   return e && e.message ? e.message : 'Something went wrong. Try again.';
 }
 
-export function esc(s){ return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+// escapes quotes too, so it's safe inside attribute values as well as text
+export function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }

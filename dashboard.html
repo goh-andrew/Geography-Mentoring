@@ -66,7 +66,7 @@ import {
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs
+  doc, getDoc, setDoc, deleteDoc, deleteField, collection, query, where, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { TOPICS } from "./topics-data.js";
 import { auth, db, fbReady, friendlyAuthError, esc } from "./cloud.js";
@@ -281,6 +281,13 @@ async function loadAdminPanel(){
   try{
     const snap=await getDocs(collection(db,'users'));
     all=snap.docs.map(d=>({uid:d.id, ...d.data()}));
+    // older mentor/teacher sign-ups saved the invite code on their (publicly
+    // readable) profile. Remove it whenever an admin opens this panel.
+    all.filter(u=>'mentorInviteCodeUsed' in u).forEach(u=>{
+      delete u.mentorInviteCodeUsed;
+      setDoc(doc(db,'users',u.uid), {mentorInviteCodeUsed:deleteField()}, {merge:true})
+        .catch(e=>console.warn('could not remove old invite code from', u.uid, e));
+    });
   }catch(e){ tbody.innerHTML='<tr><td colspan="6">Could not load users. '+esc(friendlyAuthError(e))+'</td></tr>'; console.warn(e); return; }
 
   // only approved mentors/teachers (or admins, who bypass approval) count as choosable
